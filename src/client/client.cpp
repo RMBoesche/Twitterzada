@@ -22,42 +22,31 @@
 
 #define BUFFER_SIZE 256
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 
     // int sockfd;
-	// struct hostent *server;
+    // struct hostent *server;
     // char buffer[BUFFER_SIZE];
-
-    struct sockaddr_in from;
 
     // validate the inputs
     Validation::validateUsername(std::string(argv[1]));
     Validation::validateHostname(std::string(argv[2]));
     Validation::validatePort(std::string(argv[3]));
-    
+
     std::string username = argv[1];
     // server = gethostbyname(argv[2]);
     int port = atoi(argv[3]);
 
-
-    //create the interface
+    // create the interface
     Interface interface;
     Communication communication(username, port, gethostbyname(argv[2]));
-    
+
     ///////////////
-    unsigned int length = sizeof(struct sockaddr_in);
-    char buffer[256];
+    communication.recvPort();
 
-    int n = recvfrom(communication.getSocket(), buffer, 256, 0, (struct sockaddr *) &from, &length);
-    if (n < 0)
-        printf("ERROR recvfrom");
-    
-    std::cout << "AAAAAAAAH" << buffer << std::endl;
-
-    int new_port = atoi(buffer);
-    communication.setPort(new_port);
-
-    while(1) {
+    while (1)
+    {
         communication.sendMessage(std::string("meu deus"));
         sleep(5);
     }
