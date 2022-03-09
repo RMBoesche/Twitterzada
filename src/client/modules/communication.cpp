@@ -43,6 +43,8 @@ int Communication::sendMessage(std::string cli_message) {
     
     strcpy(buffer, "NOVA PORTA BRABA DEMAIS");
 
+    std::cout << buffer << std::endl;
+
     int n = sendto(
         sockfd,
         buffer,

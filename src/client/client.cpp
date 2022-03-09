@@ -30,7 +30,6 @@ int main(int argc, char* argv[]) {
 
     struct sockaddr_in from;
 
-
     // validate the inputs
     Validation::validateUsername(std::string(argv[1]));
     Validation::validateHostname(std::string(argv[2]));
@@ -53,12 +52,15 @@ int main(int argc, char* argv[]) {
     if (n < 0)
         printf("ERROR recvfrom");
     
-    std::cout << buffer << std::endl;
+    std::cout << "AAAAAAAAH" << buffer << std::endl;
 
     int new_port = atoi(buffer);
     communication.setPort(new_port);
 
-    communication.sendMessage(NULL);
+    while(1) {
+        communication.sendMessage(std::string("meu deus"));
+        sleep(5);
+    }
     ////////////////
 
     // std::thread recv_thread( Receiver(), communication.getSocket() );

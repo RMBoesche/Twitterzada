@@ -11,7 +11,9 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 
+#define MAIN_PORT 4000
 
 typedef struct __packet{
 	uint16_t type; //Tipo do pacote (p.ex. DATA | CMD)
@@ -29,18 +31,17 @@ typedef struct __notification{
 	const char* _string; //Mensagem
 } notification;
 
-void new_socket(int port) {
+void new_socket(int port, int sockfd, struct sockaddr_in cli_addr) {
 	std::cout << 1 << std::endl;
 
-	struct sockaddr_in serv_addr;
-	struct sockaddr_in cli_addr;
+	struct sockaddr_in thread_addr;
 	int cli_sockfd;
 	char buf[256];
 
 	std::cout << 2 << std::endl;
 
-	std::string str_port = std::to_string(4000);
-	int n = sendto(cli_sockfd, str_port.c_str(), 26, 0,(struct sockaddr *) &cli_addr, sizeof(struct sockaddr));
+	std::string str_port = std::to_string(port) + '\n';
+	int n = sendto(sockfd, str_port.c_str(), 5, 0,(struct sockaddr *) &cli_addr, sizeof(struct sockaddr));
 
 	std::cout << 3 << std::endl;
 
@@ -51,38 +52,41 @@ void new_socket(int port) {
 
 	std::cout << 4 << std::endl;
 	
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(port);
-	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	bzero(&(serv_addr.sin_zero), 8);   
+	thread_addr.sin_family = AF_INET;
+	thread_addr.sin_port = htons(port);
+	thread_addr.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(thread_addr.sin_zero), 8);   
 
 	std::cout << 5 << std::endl;
 
-	if (bind(cli_sockfd, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr)) < 0) 
+	if (bind(cli_sockfd, (struct sockaddr *) &thread_addr, sizeof(struct sockaddr)) < 0) 
 		printf("ERROR on binding");
 	
 	std::cout << 6 << std::endl;
 
-	int x = recvfrom(cli_sockfd, buf, 256, 0, (struct sockaddr *) &cli_addr, &clilen);
-	
-	std::cout << buf << std::endl;
+	int x = 10;
+	while(x--) {
+		bzero(buf, 256);
+		int x = recvfrom(cli_sockfd, buf, 256, 0, (struct sockaddr *) &cli_addr, &clilen);
+		std::cout << buf << std::endl;
+		sleep(5);
+	}
 }
-
-
 
 int main(int argc, char *argv[])
 {
-	int port = 4000;
+	int port = MAIN_PORT + 1;
 	int sockfd, n;
 	socklen_t clilen;
-	struct sockaddr_in serv_addr, cli_addr1, cli_addr2;
+	struct sockaddr_in serv_addr, cli_addr;
 	char buf[256];
-	
+	std::vector<std::thread> threads;
+
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
 		printf("ERROR opening socket");
 
 	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(port);
+	serv_addr.sin_port = htons(MAIN_PORT);
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(serv_addr.sin_zero), 8);    
 	 
@@ -91,18 +95,20 @@ int main(int argc, char *argv[])
 	
 	clilen = sizeof(struct sockaddr_in);
 	
-	while(1) {
-
-		port++;
-		n = recvfrom(sockfd, buf, 256, 0, (struct sockaddr *) &cli_addr1, &clilen);
+	int x = 5;
+	while(x--) {
+		n = recvfrom(sockfd, buf, 256, 0, (struct sockaddr *) &cli_addr, &clilen);
 		if (n < 0) 
 			printf("ERROR on recvfrom");
 		printf("Received a datagram: %s\n", buf);
 
 		// create thread with socket
-		std::thread th1(new_socket, port);
-		th1.join();
+		threads.emplace_back(std::thread(new_socket, port, sockfd, cli_addr));
+		port++;
 	}
+
+	for(std::thread& t : threads) 
+		t.join();
 
 
 	// /* receive from socket */
