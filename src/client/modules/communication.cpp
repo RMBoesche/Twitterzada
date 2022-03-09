@@ -19,16 +19,26 @@ int Communication::establishConnection()
     serv_addr.sin_addr = *((struct in_addr *)server->h_addr);
     bzero(&(serv_addr.sin_zero), 8);
 
+    // clean buffer
     bzero(buffer, 256);
 
-    std::string initializer = "initiate" + username;
+    std::string initializer = "initiate " + username;
     strcpy(buffer, initializer.c_str());
+
+    // initialize structure for first communication
+    packet establ_packet = {
+        .type = ESTABLISHMENT,
+        .seqn = seqn,
+        .length = strlen(buffer),
+        .timestamp = std::time(0)
+    };
+    strcpy(establ_packet._payload, buffer);
 
     // sends an initial message
     int n = sendto(
         sockfd,
-        buffer,
-        strlen(buffer),
+        (packet *)&establ_packet,
+        sizeof(establ_packet),
         0,
         (const struct sockaddr *)&serv_addr,
         sizeof(struct sockaddr_in));
@@ -40,19 +50,31 @@ int Communication::establishConnection()
 
 int Communication::sendMessage(std::string cli_message)
 {
+    // update sequence number
+    seqn++;
+
     bzero(buffer, 256);
 
     strcpy(buffer, "NOVA PORTA BRABA DEMAIS");
+
+    packet com_packet = {
+        .type = DATA,
+        .seqn = seqn,
+        .length = strlen(buffer),
+        .timestamp = std::time(0)
+    };
+    strcpy(com_packet._payload, buffer);
 
     std::cout << buffer << std::endl;
 
     int n = sendto(
         sockfd,
-        buffer,
-        strlen(buffer),
+        &com_packet,
+        sizeof(com_packet),
         0,
         (const struct sockaddr *)&serv_addr,
-        sizeof(struct sockaddr_in));
+        sizeof(struct sockaddr_in)
+    );
 
     if (n < 0)
     {

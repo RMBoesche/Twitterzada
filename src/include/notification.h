@@ -1,5 +1,8 @@
 #include <netinet/in.h>
 
+#ifndef NOTIFICATION
+#define NOTIFICATION
+
 typedef struct __notification
 {
     uint32_t id;         // Identificador da notificação (sugere-se um identificador único)
@@ -8,3 +11,5 @@ typedef struct __notification
     uint16_t pending;    // Quantidade de leitores pendentes
     const char *_string; // Mensagem
 } notification;
+
+#endif

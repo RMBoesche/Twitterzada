@@ -1,4 +1,12 @@
 #include <netinet/in.h>
+#include <ctime>
+
+#ifndef PACKET
+#define PACKET
+
+#define ESTABLISHMENT 0
+#define DATA 1
+#define CMD 2
 
 typedef struct __packet
 {
@@ -6,5 +14,7 @@ typedef struct __packet
     uint16_t seqn;        // Número de sequência
     uint16_t length;      // Comprimento do payload
     uint16_t timestamp;   // Timestamp do dado
-    const char *_payload; // Dados da mensagem
+    char _payload[256]; // Dados da mensagem
 } packet;
+
+#endif

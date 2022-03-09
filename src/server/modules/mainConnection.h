@@ -1,0 +1,28 @@
+#include <iostream>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+
+#include "../../include/packet.h"
+
+class MainSocket {
+    int port;
+	int sockfd;
+	socklen_t clilen;
+	struct sockaddr_in serv_addr, cli_addr;
+	packet m_packet;
+public:
+    MainSocket(int port);
+    void startSocket();
+    struct sockaddr_in getCli_addr();
+    int getSocket();
+    packet recvPacket();
+    ~MainSocket();
+};

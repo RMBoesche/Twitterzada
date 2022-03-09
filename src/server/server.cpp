@@ -13,6 +13,9 @@
 #include <thread>
 #include <vector>
 
+#include "../include/packet.h"
+#include "modules/mainConnection.h"
+
 #define MAIN_PORT 4000
 
 void new_socket(int port, int sockfd, struct sockaddr_in cli_addr)
@@ -61,36 +64,32 @@ void new_socket(int port, int sockfd, struct sockaddr_in cli_addr)
 
 int main(int argc, char *argv[])
 {
+	packet recv_packet;
 	int port = MAIN_PORT + 1;
-	int sockfd, n;
-	socklen_t clilen;
-	struct sockaddr_in serv_addr, cli_addr;
-	char buf[256];
 	std::vector<std::thread> threads;
 
-	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-		printf("ERROR opening socket");
-
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(MAIN_PORT);
-	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	bzero(&(serv_addr.sin_zero), 8);
-
-	if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(struct sockaddr)) < 0)
-		printf("ERROR on binding");
-
-	clilen = sizeof(struct sockaddr_in);
+	MainSocket mainSocket(MAIN_PORT);
+	mainSocket.startSocket();
 
 	int x = 5;
 	while (x--)
 	{
-		n = recvfrom(sockfd, buf, 256, 0, (struct sockaddr *)&cli_addr, &clilen);
-		if (n < 0)
-			printf("ERROR on recvfrom");
-		printf("Received a datagram: %s\n", buf);
+		recv_packet = mainSocket.recvPacket();
+
+		std::cout << "inicio" << std::endl;
+		std::cout << recv_packet.length << std::endl;
+		std::cout << recv_packet.seqn << std::endl;
+		std::cout << recv_packet.timestamp << std::endl;
+		std::cout << recv_packet._payload << std::endl;
 
 		// create thread with socket
-		threads.emplace_back(std::thread(new_socket, port, sockfd, cli_addr));
+		threads.emplace_back(std::thread(
+			new_socket,
+			port,
+			mainSocket.getSocket(),
+			mainSocket.getCli_addr())
+		);
+
 		port++;
 	}
 
@@ -113,7 +112,5 @@ int main(int argc, char *argv[])
 	// n = sendto(sockfd, "Got your message client 2\n", 26, 0,(struct sockaddr *) &cli_addr2, sizeof(struct sockaddr));
 	// if (n  < 0)
 	// 	printf("ERROR on sendto");
-
-	close(sockfd);
 	return 0;
 }
