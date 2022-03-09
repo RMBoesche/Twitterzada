@@ -9,19 +9,21 @@
 
 #define BUFFER_SIZE 256
 
-class Communication {
+class Communication
+{
     std::string username;
     int port;
     int sockfd;
-    struct sockaddr_in serv_addr;
-	struct hostent *server;
+    struct sockaddr_in serv_addr, from;
+    struct hostent *server;
     char buffer[BUFFER_SIZE];
 
 public:
-    Communication(std::string& username, int port, struct hostent *server);
+    Communication(std::string &username, int port, struct hostent *server);
     int establishConnection();
     int getSocket();
     void setPort(int port);
     int sendMessage(std::string cli_message);
+    void recvPort();
     ~Communication();
 };

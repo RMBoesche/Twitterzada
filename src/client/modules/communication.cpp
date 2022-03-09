@@ -1,6 +1,6 @@
 #include "communication.h"
 
-Communication::Communication(std::string& name, int port, struct hostent *server) 
+Communication::Communication(std::string &name, int port, struct hostent *server)
     : username(name), port(port), server(server)
 {
     std::cout << "CREATING INSTANCE" << std::endl;
@@ -9,9 +9,10 @@ Communication::Communication(std::string& name, int port, struct hostent *server
     establishConnection();
 }
 
-int Communication::establishConnection() {
-    if( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1 )
-    std::cout << "ERROR opening socket" << std::endl;
+int Communication::establishConnection()
+{
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+        std::cout << "ERROR opening socket" << std::endl;
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port);
@@ -30,17 +31,17 @@ int Communication::establishConnection() {
         strlen(buffer),
         0,
         (const struct sockaddr *)&serv_addr,
-        sizeof(struct sockaddr_in)
-    );
-    if(n<0)
+        sizeof(struct sockaddr_in));
+    if (n < 0)
         std::cout << "ERROR sendto" << std::endl;
-    
+
     return 1;
 }
 
-int Communication::sendMessage(std::string cli_message) {
+int Communication::sendMessage(std::string cli_message)
+{
     bzero(buffer, 256);
-    
+
     strcpy(buffer, "NOVA PORTA BRABA DEMAIS");
 
     std::cout << buffer << std::endl;
@@ -51,10 +52,10 @@ int Communication::sendMessage(std::string cli_message) {
         strlen(buffer),
         0,
         (const struct sockaddr *)&serv_addr,
-        sizeof(struct sockaddr_in)
-    );
-    
-    if(n<0) {
+        sizeof(struct sockaddr_in));
+
+    if (n < 0)
+    {
         std::cout << "ERROR sendto" << std::endl;
         return 0;
     }
@@ -62,15 +63,31 @@ int Communication::sendMessage(std::string cli_message) {
     return 1;
 }
 
-int Communication::getSocket() {
+int Communication::getSocket()
+{
     return sockfd;
 }
 
-void Communication::setPort(int port) {
+void Communication::setPort(int port)
+{
     serv_addr.sin_port = htons(port);
 }
 
-Communication::~Communication() {
+void Communication::recvPort()
+{
+    unsigned int length = sizeof(struct sockaddr_in);
+    char buffer[256];
+
+    int n = recvfrom(sockfd, buffer, 256, 0, (struct sockaddr *)&from, &length);
+    if (n < 0)
+        printf("ERROR recvfrom");
+
+    int new_port = atoi(buffer);
+    setPort(new_port);
+}
+
+Communication::~Communication()
+{
     std::cout << "DESTROYING INSTANCE" << std::endl;
     close(sockfd);
 }
