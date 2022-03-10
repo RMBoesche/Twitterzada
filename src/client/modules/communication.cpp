@@ -1,11 +1,9 @@
 #include "communication.h"
+#include "interface.h"
 
 Communication::Communication(std::string &name, int port, struct hostent *server)
     : username(name), port(port), server(server)
 {
-    std::cout << "CREATING INSTANCE" << std::endl;
-    std::cout << username << port << std::endl;
-
     establishConnection();
 }
 
@@ -48,7 +46,7 @@ int Communication::establishConnection()
     return 1;
 }
 
-int Communication::sendMessage(std::string cli_message, int type = DATA)
+int Communication::sendMessage(std::string cli_message, int type)
 {
     // update sequence number
     seqn++;
@@ -63,10 +61,9 @@ int Communication::sendMessage(std::string cli_message, int type = DATA)
         .length = strlen(buffer),
         .timestamp = std::time(0)
     };
+
     strcpy(communication_packet._payload, buffer);
-
-    std::cout << buffer << std::endl;
-
+    
     int n = sendto(
         sockfd,
         &communication_packet,
@@ -78,7 +75,7 @@ int Communication::sendMessage(std::string cli_message, int type = DATA)
 
     if (n < 0)
     {
-        std::cout << "ERROR sendto" << std::endl;
+        std::cout << "ERROR sendto aqui" << std::endl;
         return 0;
     }
 
@@ -95,23 +92,36 @@ void Communication::setPort(int port)
     serv_addr.sin_port = htons(port);
 }
 
+packet Communication::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
+    
+    socklen_t clilen = sizeof(struct sockaddr_in);
+    packet recv_packet;
+
+    int n = recvfrom(
+        sockfd,
+        &recv_packet,
+        sizeof(packet),
+        0,
+        (struct sockaddr *) cli_addr,
+        &clilen
+    );
+    if (n < 0)
+		printf("ERROR on recvfrom");
+    return recv_packet;
+}
+
 void Communication::recvPort()
 {
-    unsigned int length = sizeof(struct sockaddr_in);
-    char buffer[256];
+    packet recv_packet = recvPacket(sockfd, &serv_addr);
 
-    int n = recvfrom(sockfd, buffer, 256, 0, (struct sockaddr *)&from, &length);
-    if (n < 0)
-        printf("ERROR recvfrom");
-
-    int new_port = atoi(buffer);
+    int new_port = atoi(recv_packet._payload);
+    std::cout << new_port;
     setPort(new_port);
 }
 
 Communication::~Communication()
 {
-    std::cout << "saindo";
-    sendMessage(std::string("end"), ESTABLISHMENT);
+    sendMessage(std::string("END"), ESTABLISHMENT);
 
     close(sockfd);
 }

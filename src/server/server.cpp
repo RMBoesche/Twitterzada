@@ -34,23 +34,23 @@ int main(int argc, char *argv[])
 
 	while (true)
 	{
+		//request communication by the client (automatic)
 		recv_packet = CommunicationManager::recvPacket(mainSocket.getSocket(), &cli_addr);
 
-		std::cout << "inicio" << std::endl;
-		std::cout << recv_packet.length << std::endl;
-		std::cout << recv_packet.seqn << std::endl;
-		std::cout << recv_packet.timestamp << std::endl;
-		std::cout << recv_packet._payload << std::endl;
-
+		//request communication message content is the "username"
 		std::string username = std::string(recv_packet._payload);
 
+		
 		if(SessionManager::login(username)) {
+			//
 			sessionManager.createUser(
 				username,
 				port,
 				mainSocket.getSocket(),
 				cli_addr
 			);
+
+			//
 			port++;
 		}
 	}

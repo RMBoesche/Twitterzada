@@ -2,10 +2,10 @@
 #include "validation.h"
 
 Interface::Interface() {
-    cleanScreen();
 }
 
 void Interface::setInput() {
+    cleanScreen();
     std::getline(std::cin, lineRead);
 }
 
@@ -17,7 +17,6 @@ int Interface::getQuery() {
     // get the first word
     std::string query = lineRead.substr(0, lineRead.find(' '));
 
-    std::cout << query << std::endl;
 
     // determine the command
     if (query == std::string("SEND")) {
@@ -26,8 +25,12 @@ int Interface::getQuery() {
     else if (query == std::string("FOLLOW")) {
         return FOLLOW;
     }
+    else if(query == std::string("end")) {
+        return END;
+    }
     else {
         // indicating error
+        std::cout << "INVALID ARGUMENT" << std::endl;
         return -1;
     }
 }

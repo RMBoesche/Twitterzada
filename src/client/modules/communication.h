@@ -27,6 +27,7 @@ public:
     int getSocket();
     void setPort(int port);
     int sendMessage(std::string cli_message, int type);
+    packet recvPacket(int sockfd, struct sockaddr_in* cli_addr);
     void recvPort();
     ~Communication();
 };

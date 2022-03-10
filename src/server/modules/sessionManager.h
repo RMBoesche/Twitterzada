@@ -23,7 +23,7 @@
 
 class SessionManager {
     std::vector<std::thread> threadVector;
-    std::mutex userMutex;
+    static std::mutex loginMutex;
     static std::map<std::string, int> activeUsers;
 public:
     SessionManager();

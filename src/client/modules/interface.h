@@ -3,6 +3,7 @@
 
 #define SEND 0
 #define FOLLOW 1
+#define END 2
 
 class Interface {
     std::string lineRead;
