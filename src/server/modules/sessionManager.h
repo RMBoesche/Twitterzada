@@ -16,14 +16,19 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <vector>
+#include <map>
 #include "../../include/packet.h"
+
+#define MAX_USERS 2
 
 class SessionManager {
     std::vector<std::thread> threadVector;
     std::mutex userMutex;
+    static std::map<std::string, int> activeUsers;
 public:
     SessionManager();
-    void createUser(int port, int sockfd, struct sockaddr_in cli_addr);
+    static bool login(std::string username);
+    static void logout(std::string username);
+    void createUser(std::string username, int port, int sockfd, struct sockaddr_in cli_addr);
     ~SessionManager();
 };

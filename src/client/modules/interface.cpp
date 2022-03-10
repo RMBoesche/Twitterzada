@@ -30,7 +30,6 @@ int Interface::getQuery() {
         // indicating error
         return -1;
     }
-
 }
 
 std::string Interface::getUsername() {

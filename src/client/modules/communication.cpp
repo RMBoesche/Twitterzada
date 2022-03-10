@@ -22,7 +22,7 @@ int Communication::establishConnection()
     // clean buffer
     bzero(buffer, 256);
 
-    std::string initializer = "start" + username;
+    std::string initializer = username;
     strcpy(buffer, initializer.c_str());
 
     // initialize structure for first communication
