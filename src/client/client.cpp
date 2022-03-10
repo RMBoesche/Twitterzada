@@ -55,6 +55,4 @@ int main(int argc, char *argv[])
 
     // std::thread recv_thread( Receiver(), communication.getSocket() );
     // recv_thread.join();
-
-    getchar();
 }

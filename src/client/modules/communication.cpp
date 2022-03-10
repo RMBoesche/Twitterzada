@@ -110,6 +110,7 @@ void Communication::recvPort()
 
 Communication::~Communication()
 {
+    std::cout << "saindo";
     sendMessage(std::string("end"), ESTABLISHMENT);
 
     close(sockfd);

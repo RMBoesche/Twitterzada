@@ -74,8 +74,7 @@ int main(int argc, char *argv[])
 
 	SessionManager sessionManager;
 
-	int x = 5;
-	while (x--)
+	while (1)
 	{
 		recv_packet = mainSocket.recvPacket();
 
@@ -96,22 +95,6 @@ int main(int argc, char *argv[])
 
 	for (std::thread &t : threads)
 		t.join();
-
-	// /* receive from socket */
-	// n = recvfrom(sockfd, buf, 256, 0, (struct sockaddr *) &cli_addr2, &clilen);
-
-	// // std::cout << inet_ntoa( cli_addr1.sin_addr ); // 127.0.0.1 in all
-	// // std::cout << inet_ntoa( cli_addr2.sin_addr );
-	// // std::cout << inet_ntoa( serv_addr.sin_addr ); // 0.0.0.0
-
-	// if (n < 0)
-	// 	printf("ERROR on recvfrom");
-	// printf("Received a datagram: %s\n", buf);
-
-	// /* send to socket */
-	// n = sendto(sockfd, "Got your message client 1\n", 26, 0,(struct sockaddr *) &cli_addr1, sizeof(struct sockaddr));
-	// n = sendto(sockfd, "Got your message client 2\n", 26, 0,(struct sockaddr *) &cli_addr2, sizeof(struct sockaddr));
-	// if (n  < 0)
-	// 	printf("ERROR on sendto");
+		
 	return 0;
 }

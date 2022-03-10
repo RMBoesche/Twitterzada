@@ -1,7 +1,5 @@
 #include "sessionManager.h"
 #include "userThread.h"
-#include <unistd.h>
-
 // VAI PRECISAR DE SINCRONIZAÇÃO ->
 //                                  ALTERAÇÕES NA DB
 //                                  ENVIO DE NOTIFICAÇÕES
@@ -9,12 +7,15 @@
 
 SessionManager::SessionManager() {}
 
-void SessionManager::createUser(int port, int socket, struct sockaddr_in cli_addr) {
+void SessionManager::createUser(int port, int sockfd, struct sockaddr_in cli_addr) {
+	std::cout << cli_addr.sin_port << std::endl;
+
+	userThread userThr;
+
 	threadVector.emplace_back(
-		userThread(), 
-		// params
+		userThread::start,
 		port,
-		socket,
+		sockfd,
 		cli_addr
 	);
 }

@@ -3,15 +3,14 @@
 #include <string.h>
 #include "../../include/packet.h"
 
-void userThread::operator()(int port, int sockfd, struct sockaddr_in cli_addr) {
-
-    std::cout << 1 << std::endl;
+void userThread::start(int port, int sockfd, struct sockaddr_in cli_addr) {
+	std::cout << 1 << std::endl;
 
 	struct sockaddr_in thread_addr;
 	int cli_sockfd;
 	char buf[256];
-    packet receive_packet;
-    int exit = 0;
+	packet receive_packet;
+	int exit = 0;
 
 	std::cout << 2 << std::endl;
 
@@ -44,11 +43,11 @@ void userThread::operator()(int port, int sockfd, struct sockaddr_in cli_addr) {
 		bzero(buf, 256);
 		int x = recvfrom(cli_sockfd, &receive_packet, sizeof(receive_packet), 0, (struct sockaddr *)&cli_addr, &clilen);
 		std::cout << receive_packet._payload << std::endl;
-        if(strcmp("end", receive_packet._payload)) {
-            exit = 1;
-        }
-        sleep(5);
+		if(strcmp("end", receive_packet._payload) == 0) {
+			exit = 1;
+		}
+		sleep(5);
 	}
 
-    std::cout << "terminando a thread" << std::endl;
+	std::cout << "terminando a thread" << std::endl;
 }

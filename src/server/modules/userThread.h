@@ -1,5 +1,7 @@
 #include <iostream>
+#include "../../include/packet.h"
 
 class userThread {
-    void operator()(int port, int sockfd, struct sockaddr_in cli_addr);
+   public: 
+        static void start(int port, int sockfd, struct sockaddr_in cli_addr); 
 };
