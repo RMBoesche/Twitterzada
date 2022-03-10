@@ -22,23 +22,23 @@ int Communication::establishConnection()
     // clean buffer
     bzero(buffer, 256);
 
-    std::string initializer = "initiate " + username;
+    std::string initializer = "start" + username;
     strcpy(buffer, initializer.c_str());
 
     // initialize structure for first communication
-    packet establ_packet = {
+    packet establish_packet = {
         .type = ESTABLISHMENT,
         .seqn = seqn,
         .length = strlen(buffer),
         .timestamp = std::time(0)
     };
-    strcpy(establ_packet._payload, buffer);
+    strcpy(establish_packet._payload, buffer);
 
     // sends an initial message
     int n = sendto(
         sockfd,
-        (packet *)&establ_packet,
-        sizeof(establ_packet),
+        (packet *)&establish_packet,
+        sizeof(establish_packet),
         0,
         (const struct sockaddr *)&serv_addr,
         sizeof(struct sockaddr_in));
@@ -48,29 +48,29 @@ int Communication::establishConnection()
     return 1;
 }
 
-int Communication::sendMessage(std::string cli_message)
+int Communication::sendMessage(std::string cli_message, int type = DATA)
 {
     // update sequence number
     seqn++;
 
     bzero(buffer, 256);
 
-    strcpy(buffer, "NOVA PORTA BRABA DEMAIS");
+    strcpy(buffer, cli_message.c_str());
 
-    packet com_packet = {
-        .type = DATA,
+    packet communication_packet = {
+        .type = type,
         .seqn = seqn,
         .length = strlen(buffer),
         .timestamp = std::time(0)
     };
-    strcpy(com_packet._payload, buffer);
+    strcpy(communication_packet._payload, buffer);
 
     std::cout << buffer << std::endl;
 
     int n = sendto(
         sockfd,
-        &com_packet,
-        sizeof(com_packet),
+        &communication_packet,
+        sizeof(communication_packet),
         0,
         (const struct sockaddr *)&serv_addr,
         sizeof(struct sockaddr_in)
@@ -110,6 +110,7 @@ void Communication::recvPort()
 
 Communication::~Communication()
 {
-    std::cout << "DESTROYING INSTANCE" << std::endl;
+    sendMessage(std::string("end"), ESTABLISHMENT);
+
     close(sockfd);
 }

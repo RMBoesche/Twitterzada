@@ -26,7 +26,7 @@ public:
     int establishConnection();
     int getSocket();
     void setPort(int port);
-    int sendMessage(std::string cli_message);
+    int sendMessage(std::string cli_message, int type);
     void recvPort();
     ~Communication();
 };

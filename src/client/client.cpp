@@ -44,10 +44,11 @@ int main(int argc, char *argv[])
 
     ///////////////
     communication.recvPort();
-
-    while (1)
+    
+    int x=5;
+    while (x--)
     {
-        communication.sendMessage(std::string("meu deus"));
+        communication.sendMessage(std::string("meu deus"), 1);
         sleep(5);
     }
     ////////////////

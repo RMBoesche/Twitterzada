@@ -1,5 +1,4 @@
-#include "mainConnection.h"
-
+#include "mainSocket.h"
 
 
 MainSocket::MainSocket(int port)
@@ -24,7 +23,14 @@ void MainSocket::startSocket() {
 }
 
 packet MainSocket::recvPacket() {
-    int n = recvfrom(sockfd, &m_packet, sizeof(struct __packet), 0, (struct sockaddr *) &cli_addr, &clilen);
+    int n = recvfrom(
+        sockfd,
+        &m_packet,
+        sizeof(struct __packet),
+        0,
+        (struct sockaddr *) &cli_addr,
+        &clilen
+    );
     if (n < 0)
 		printf("ERROR on recvfrom");
     return m_packet;

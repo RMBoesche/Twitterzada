@@ -14,7 +14,8 @@
 #include <vector>
 
 #include "../include/packet.h"
-#include "modules/mainConnection.h"
+#include "modules/sessionManager.h"
+#include "modules/mainSocket.h"
 
 #define MAIN_PORT 4000
 
@@ -71,6 +72,8 @@ int main(int argc, char *argv[])
 	MainSocket mainSocket(MAIN_PORT);
 	mainSocket.startSocket();
 
+	SessionManager sessionManager;
+
 	int x = 5;
 	while (x--)
 	{
@@ -82,12 +85,10 @@ int main(int argc, char *argv[])
 		std::cout << recv_packet.timestamp << std::endl;
 		std::cout << recv_packet._payload << std::endl;
 
-		// create thread with socket
-		threads.emplace_back(std::thread(
-			new_socket,
+		sessionManager.createUser(
 			port,
 			mainSocket.getSocket(),
-			mainSocket.getCli_addr())
+			mainSocket.getCli_addr()
 		);
 
 		port++;
