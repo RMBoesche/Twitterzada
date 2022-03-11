@@ -25,11 +25,11 @@ void userThread::start(std::string username, int port, int sockfd, struct sockad
 	int seqn = 0;
 	struct sockaddr_in thread_addr;
 	int cli_sockfd;
-	packet receive_packet;
+	Packet receive_packet;
 
 	std::string str_port = std::to_string(port) + '\0';
 
-	packet send_packet = {
+	Packet send_packet = {
 		.type = DATA,
 		.seqn = StorageManager::getSeqn(),
 		.length = str_port.length(),
@@ -55,8 +55,10 @@ void userThread::start(std::string username, int port, int sockfd, struct sockad
 		if(query == SEND) {
 			//...
 			std::cout << "send";
+			StorageManager::addNotification(username, CommunicationManager::getContent(receive_packet._payload));
 		}
 		else if(query == FOLLOW) {
+			std::cout << "follow";
 			// add the follower to the user
 			StorageManager::addFollower(username, CommunicationManager::getContent(receive_packet._payload));
 		}

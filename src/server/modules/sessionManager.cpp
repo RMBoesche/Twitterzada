@@ -20,26 +20,20 @@ void SessionManager::createUser(std::string username, int port, int sockfd, stru
 
 bool SessionManager::login(std::string username) {
 	loginMutex.lock();
+	bool flag = false;
 	// if the user is not active
 	if(activeUsers.find(username) == activeUsers.end()) {
 		activeUsers.insert({username, 1});
-		loginMutex.unlock();
-		return true;
+		flag = true;
 	}
 	// if the user is already logged in
-	else {
-		if(activeUsers[username] < MAX_USERS) {
-			// increment number of active users
-			activeUsers[username]++;
-			loginMutex.unlock();
-			return true;
-		}
-		else {
-			std::cout << "MAXIMUM ACTIVE USERS FOR THIS USERNAME" << std::endl;
-			loginMutex.unlock();
-			return false;
-		}
+	else if (activeUsers[username] < MAX_USERS) {
+		// increment number of active users
+		activeUsers[username]++;
+		flag = true;
 	}
+	loginMutex.unlock();
+	return flag;
 }
 
 

@@ -24,7 +24,7 @@ int Communication::establishConnection()
     strcpy(buffer, initializer.c_str());
 
     // initialize structure for first communication
-    packet establish_packet = {
+    Packet establish_packet = {
         .type = ESTABLISHMENT,
         .seqn = seqn,
         .length = strlen(buffer),
@@ -35,7 +35,7 @@ int Communication::establishConnection()
     // sends an initial message
     int n = sendto(
         sockfd,
-        (packet *)&establish_packet,
+        (Packet *)&establish_packet,
         sizeof(establish_packet),
         0,
         (const struct sockaddr *)&serv_addr,
@@ -55,7 +55,7 @@ int Communication::sendMessage(std::string cli_message, int type)
 
     strcpy(buffer, cli_message.c_str());
 
-    packet communication_packet = {
+    Packet communication_packet = {
         .type = type,
         .seqn = seqn,
         .length = strlen(buffer),
@@ -92,15 +92,15 @@ void Communication::setPort(int port)
     serv_addr.sin_port = htons(port);
 }
 
-packet Communication::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
+Packet Communication::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
     
     socklen_t clilen = sizeof(struct sockaddr_in);
-    packet recv_packet;
+    Packet recv_packet;
 
     int n = recvfrom(
         sockfd,
         &recv_packet,
-        sizeof(packet),
+        sizeof(recv_packet),
         0,
         (struct sockaddr *) cli_addr,
         &clilen
@@ -112,7 +112,7 @@ packet Communication::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
 
 void Communication::recvPort()
 {
-    packet recv_packet = recvPacket(sockfd, &serv_addr);
+    Packet recv_packet = recvPacket(sockfd, &serv_addr);
 
     int new_port = atoi(recv_packet._payload);
     std::cout << new_port;

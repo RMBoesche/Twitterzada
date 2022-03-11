@@ -22,7 +22,7 @@
 
 int main(int argc, char *argv[])
 {
-	packet recv_packet;
+	Packet recv_packet;
 	int port = MAIN_PORT + 1;
 	std::vector<std::thread> threads;
 	struct sockaddr_in cli_addr;

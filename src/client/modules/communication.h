@@ -17,7 +17,7 @@ class Communication
     int sockfd;
     struct sockaddr_in serv_addr, from;
     struct hostent *server;
-    packet u_packet;
+    Packet u_packet;
     char buffer[BUFFER_SIZE];
     int seqn = 0;
 
@@ -27,7 +27,7 @@ public:
     int getSocket();
     void setPort(int port);
     int sendMessage(std::string cli_message, int type);
-    packet recvPacket(int sockfd, struct sockaddr_in* cli_addr);
+    Packet recvPacket(int sockfd, struct sockaddr_in* cli_addr);
     void recvPort();
     ~Communication();
 };

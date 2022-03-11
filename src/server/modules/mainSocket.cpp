@@ -22,7 +22,7 @@ void MainSocket::startSocket() {
     
 }
 
-packet MainSocket::recvPacket() {
+Packet MainSocket::recvPacket() {
     int n = recvfrom(
         sockfd,
         &m_packet,

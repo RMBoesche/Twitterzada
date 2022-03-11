@@ -26,15 +26,15 @@ std::string CommunicationManager::getContent(std::string received_string) {
      return received_string.substr(received_string.find(' ') + 1);
 }
 
-packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
+Packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
     
     socklen_t clilen = sizeof(struct sockaddr_in);
-    packet recv_packet;
+    Packet packet;
 
     std::cout << std::endl;
     int n = recvfrom(
         sockfd,
-        &recv_packet,
+        &packet,
         sizeof(packet),
         0,
         (struct sockaddr *)cli_addr,
@@ -44,10 +44,10 @@ packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in* cli_addr
     if (n < 0)
 		printf("ERROR on recvfrom");
 
-    return recv_packet;
+    return packet;
 }
 
-void CommunicationManager::sendPacket(packet& packet, int sockfd, struct sockaddr_in& cli_addr) {
+void CommunicationManager::sendPacket(Packet& packet, int sockfd, struct sockaddr_in& cli_addr) {
     
     int n = sendto(sockfd, &packet, sizeof(packet), 0, (struct sockaddr *)&cli_addr, sizeof(struct sockaddr));
     if(n<0) {

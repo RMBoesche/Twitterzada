@@ -9,7 +9,7 @@ typedef struct __notification
     uint32_t timestamp;  // Timestamp da notificação
     uint16_t length;     // Tamanho da mensagem
     uint16_t pending;    // Quantidade de leitores pendentes
-    const char *_string; // Mensagem
-} notification;
+    char _string[128]; // Mensagem
+} Notification;
 
 #endif

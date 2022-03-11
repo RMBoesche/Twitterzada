@@ -17,12 +17,12 @@ class MainSocket {
 	int sockfd;
 	socklen_t clilen;
 	struct sockaddr_in serv_addr, cli_addr;
-	packet m_packet;
+	Packet m_packet;
 public:
     MainSocket(int port);
     void startSocket();
     struct sockaddr_in getCli_addr();
     int getSocket();
-    packet recvPacket();
+    Packet recvPacket();
     ~MainSocket();
 };
