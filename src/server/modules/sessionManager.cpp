@@ -6,14 +6,13 @@ std::mutex SessionManager::loginMutex;
 
 SessionManager::SessionManager() {}
 
-void SessionManager::createUser(std::string username, int port, int sockfd, struct sockaddr_in cli_addr) {
+void SessionManager::createUser(std::string username, int& cli_sockfd, struct sockaddr_in& cli_addr) {
 	std::cout << cli_addr.sin_port << std::endl;
 
 	threadVector.emplace_back(
-		userThread::start,
+		UserThread::start,
 		username,
-		port,
-		sockfd,
+		cli_sockfd,
 		cli_addr 
 	);
 }

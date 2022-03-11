@@ -1,5 +1,5 @@
-#ifndef storageManager
-#define storageManager
+#ifndef storageManager_def
+#define storageManager_def
 
 #include <iostream>
 #include <map>

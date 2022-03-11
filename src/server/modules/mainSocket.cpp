@@ -19,7 +19,7 @@ void MainSocket::startSocket() {
 	 
 	if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr)) < 0) 
 		printf("ERROR on binding");
-    
+   
 }
 
 Packet MainSocket::recvPacket() {

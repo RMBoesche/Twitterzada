@@ -7,56 +7,57 @@
 #include "communicationManager.h"
 #include "storageManager.h"
 
-void creatSocket(int& cli_sockfd, int port, struct sockaddr_in& thread_addr) {
-	if ((cli_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-		printf("ERROR opening socket");
+// void UserThread::createSocket(int& cli_sockfd, int port, struct sockaddr_in& thread_addr) {
+// 	if ((cli_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+// 		printf("ERROR opening socket");
 
-	thread_addr.sin_family = AF_INET;
-	thread_addr.sin_port = htons(port);
-	thread_addr.sin_addr.s_addr = INADDR_ANY;
-	bzero(&(thread_addr.sin_zero), 8);
+// 	thread_addr.sin_family = AF_INET;
+// 	thread_addr.sin_port = htons(port);
+// 	thread_addr.sin_addr.s_addr = INADDR_ANY;
+// 	bzero(&(thread_addr.sin_zero), 8);
 
-	if (bind(cli_sockfd, (struct sockaddr *)&thread_addr, sizeof(struct sockaddr)) < 0)
-		printf("ERROR on binding");
-}
+// 	if (bind(cli_sockfd, (struct sockaddr *)&thread_addr, sizeof(struct sockaddr)) < 0)
+// 		printf("ERROR on binding");
+// }
 
-void userThread::start(std::string username, int port, int sockfd, struct sockaddr_in cli_addr) {
+void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in cli_addr) {
 
 	int seqn = 0;
-	struct sockaddr_in thread_addr;
-	int cli_sockfd;
+	// struct sockaddr_in thread_addr;
 	Packet receive_packet;
 
-	std::string str_port = std::to_string(port) + '\0';
 
-	Packet send_packet = {
-		.type = DATA,
-		.seqn = StorageManager::getSeqn(),
-		.length = str_port.length(),
-		.timestamp = std::time(0)
-	};
-	strcpy(send_packet._payload, str_port.c_str());
 
-	// send new port to be used to the user
-	CommunicationManager::sendPacket(send_packet, sockfd, cli_addr);
+	// std::string str_port = std::to_string(port) + '\0';
 
-	socklen_t clilen = sizeof(struct sockaddr_in);
+	// Packet send_packet = {
+	// 	.type = DATA,
+	// 	.seqn = StorageManager::getSeqn(),
+	// 	.length = str_port.length(),
+	// 	.timestamp = std::time(0)
+	// };
+	// strcpy(send_packet._payload, str_port.c_str());
 
-	// create the new socket in the new port
-	creatSocket(cli_sockfd, port, thread_addr);
+	// // create the new socket in the new port
+	// createSocket(cli_sockfd, port, thread_addr);
+	// // send new port to be used to the user
 
-	// cria thread -> envia as notificacoes
-	
+	// CommunicationManager::sendPacket(send_packet, cli_sockfd, cli_addr);
+
+	// socklen_t clilen = sizeof(struct sockaddr_in);
+
 	while (true)
 	{
 
-
+		// std::cout << "port" << cli_addr.sin_port << std::endl;
+		// std::cout << "addr" << cli_addr.sin_addr.s_addr << std::endl;
+		// std::cout << "socket" << sockfd << std::endl;
 		// receive query and content
 		// for example: SEND message
 		receive_packet = CommunicationManager::recvPacket(cli_sockfd, cli_addr);
 
 		int query = CommunicationManager::getQuery(receive_packet._payload);
-		std::cout << query << std::endl;
+		// std::cout << query << std::endl;
 		if(query == SEND) {
 			//...
 			std::cout << "send";

@@ -29,6 +29,6 @@ public:
     SessionManager();
     static bool login(std::string username);
     static void logout(std::string username);
-    void createUser(std::string username, int port, int sockfd, struct sockaddr_in cli_addr);
+    void createUser(std::string username, int& cli_sockfd, struct sockaddr_in& cli_addr);
     ~SessionManager();
 };

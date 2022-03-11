@@ -1,6 +1,18 @@
 #include "communicationManager.h"
 #include "../../include/packet.h"
 
+void CommunicationManager::createSocket(int& cli_sockfd, int port, struct sockaddr_in& thread_addr) {
+	if ((cli_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+		printf("ERROR opening socket");
+
+	thread_addr.sin_family = AF_INET;
+	thread_addr.sin_port = htons(port);
+	thread_addr.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(thread_addr.sin_zero), 8);
+
+	if (bind(cli_sockfd, (struct sockaddr *)&thread_addr, sizeof(struct sockaddr)) < 0)
+		printf("ERROR on binding");
+}
 
 int CommunicationManager::getQuery(std::string received_string) {
     //get the first word
@@ -42,7 +54,7 @@ Packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in& cli_addr
     );
 
     if (n < 0)
-		printf("ERROR on recvfrom");
+		// printf("ERROR on recvfrom");
 
     return packet;
 }
