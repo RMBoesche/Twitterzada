@@ -26,7 +26,7 @@ std::string CommunicationManager::getContent(std::string received_string) {
      return received_string.substr(received_string.find(' ') + 1);
 }
 
-Packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
+Packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in& cli_addr) {
     
     socklen_t clilen = sizeof(struct sockaddr_in);
     Packet packet;
@@ -37,7 +37,7 @@ Packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in* cli_addr
         &packet,
         sizeof(packet),
         0,
-        (struct sockaddr *)cli_addr,
+        (struct sockaddr *)&cli_addr,
         &clilen
     );
 

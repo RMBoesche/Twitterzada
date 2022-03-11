@@ -39,19 +39,24 @@ void userThread::start(std::string username, int port, int sockfd, struct sockad
 
 	// send new port to be used to the user
 	CommunicationManager::sendPacket(send_packet, sockfd, cli_addr);
-	// int n = sendto(sockfd, str_port.c_str(), 5, 0, (struct sockaddr *)&cli_addr, sizeof(struct sockaddr));
 
 	socklen_t clilen = sizeof(struct sockaddr_in);
 
 	// create the new socket in the new port
 	creatSocket(cli_sockfd, port, thread_addr);
 
+	// cria thread -> envia as notificacoes
+	
 	while (true)
 	{
-		receive_packet = CommunicationManager::recvPacket(cli_sockfd, &cli_addr);
-		// int x = recvfrom(cli_sockfd, &receive_packet, sizeof(receive_packet), 0, (struct sockaddr *)&cli_addr, &clilen);
+
+
+		// receive query and content
+		// for example: SEND message
+		receive_packet = CommunicationManager::recvPacket(cli_sockfd, cli_addr);
 
 		int query = CommunicationManager::getQuery(receive_packet._payload);
+		std::cout << query << std::endl;
 		if(query == SEND) {
 			//...
 			std::cout << "send";

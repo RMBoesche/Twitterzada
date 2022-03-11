@@ -7,8 +7,7 @@ Communication::Communication(std::string &name, int port, struct hostent *server
     establishConnection();
 }
 
-int Communication::establishConnection()
-{
+void Communication::createSocket() {
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
         std::cout << "ERROR opening socket" << std::endl;
 
@@ -16,6 +15,10 @@ int Communication::establishConnection()
     serv_addr.sin_port = htons(port);
     serv_addr.sin_addr = *((struct in_addr *)server->h_addr);
     bzero(&(serv_addr.sin_zero), 8);
+}
+
+int Communication::establishConnection() {
+    createSocket();
 
     // clean buffer
     bzero(buffer, 256);
@@ -46,8 +49,7 @@ int Communication::establishConnection()
     return 1;
 }
 
-int Communication::sendMessage(std::string cli_message, int type)
-{
+int Communication::sendMessage(std::string cli_message, int type) {
     // update sequence number
     seqn++;
 
@@ -82,17 +84,15 @@ int Communication::sendMessage(std::string cli_message, int type)
     return 1;
 }
 
-int Communication::getSocket()
-{
+int Communication::getSocket() {
     return sockfd;
 }
 
-void Communication::setPort(int port)
-{
+void Communication::setPort(int port) {
     serv_addr.sin_port = htons(port);
 }
 
-Packet Communication::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
+Packet Communication::recvPacket() {
     
     socklen_t clilen = sizeof(struct sockaddr_in);
     Packet recv_packet;
@@ -102,25 +102,23 @@ Packet Communication::recvPacket(int sockfd, struct sockaddr_in* cli_addr) {
         &recv_packet,
         sizeof(recv_packet),
         0,
-        (struct sockaddr *) cli_addr,
+        (struct sockaddr *)&serv_addr,
         &clilen
     );
-    if (n < 0)
-		printf("ERROR on recvfrom");
+    // if (n < 0)
+	// 	printf("ERROR on recvfrom\n");
     return recv_packet;
 }
 
-void Communication::recvPort()
-{
-    Packet recv_packet = recvPacket(sockfd, &serv_addr);
+void Communication::recvPort() {
+    Packet recv_packet = recvPacket();
 
     int new_port = atoi(recv_packet._payload);
     std::cout << new_port;
     setPort(new_port);
 }
 
-Communication::~Communication()
-{
+Communication::~Communication() {
     sendMessage(std::string("END"), ESTABLISHMENT);
 
     close(sockfd);

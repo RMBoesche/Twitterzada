@@ -33,6 +33,9 @@ bool SessionManager::login(std::string username) {
 		flag = true;
 	}
 	loginMutex.unlock();
+	if (flag) {
+		
+	}
 	return flag;
 }
 

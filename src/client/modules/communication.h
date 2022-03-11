@@ -1,3 +1,6 @@
+#ifndef communication_package
+#define communication_package
+
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -23,11 +26,14 @@ class Communication
 
 public:
     Communication(std::string &username, int port, struct hostent *server);
+    void createSocket();
     int establishConnection();
     int getSocket();
     void setPort(int port);
     int sendMessage(std::string cli_message, int type);
-    Packet recvPacket(int sockfd, struct sockaddr_in* cli_addr);
+    Packet recvPacket();
     void recvPort();
     ~Communication();
 };
+
+#endif

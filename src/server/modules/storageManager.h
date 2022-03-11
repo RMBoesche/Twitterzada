@@ -15,7 +15,7 @@
 class StorageManager {
     static std::map<std::string, std::set<std::string>> userFollowers;
     static std::map<std::string, std::set<Notification>> userNotifications;
-    static std::map<std::string, std::tuple<std::string, int>> userPendingNotifications;
+    static std::map<std::string, std::set< std::tuple< std::string, int >>> userPendingNotifications;
 
     static std::mutex sessionLock;
 
@@ -28,6 +28,7 @@ public:
     static void incrementSeqn();
     static void addFollower(std::string username, std::string follower);
     static void addNotification(std::string username, std::string message);
+    static void addUserPendingNotification(std::string username, int id);
 };
 
 #endif

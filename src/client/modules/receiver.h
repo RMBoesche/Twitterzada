@@ -6,9 +6,11 @@
 #include <netdb.h>
 #include <string.h>
 #include <unistd.h>
+#include "../../include/packet.h"
+#include "communication.h"
 
 class Receiver {
     struct sockaddr_in from;
 public:
-    void operator()(int sockfd);
+    void operator()(Communication& communication);
 };

@@ -37,24 +37,38 @@ int main(int argc, char *argv[])
     Interface interface;
     Communication communication(username, port, gethostbyname(server));
 
-    communication.recvPort();
-    
-    while (true)
-    {
-        // communication.sendMessage(std::string("meu deus"), 1);
-        interface.setInput();
+    Packet loggin_packet = communication.recvPacket();
 
-        // get operation
-        int query = interface.getQuery();
-        std::cout << "QUERY" << query;
-        if (query == SEND) {
-            communication.sendMessage(std::string("SEND "+interface.getMessage()), DATA);
-        } 
-        else if (query == FOLLOW) { 
-            communication.sendMessage(std::string("FOLLOW "+interface.getUsername()), DATA);
-        } 
-        else if (query == END) {
-            break;
+    if(strcmp(loggin_packet._payload, "failed") == 0) {
+
+        std::cout << "MAX USERS LOGGED IN" << std::endl;
+        return 0;
+    }
+    else {
+
+        std::cout << "Login Successful!" << std::endl;
+        communication.recvPort();
+        std::thread listenerThread(Receiver(), std::ref(communication));
+        
+        while (true)
+        {
+            // communication.sendMessage(std::string("meu deus"), 1);
+            interface.setInput();
+
+            // get operation
+            int query = interface.getQuery();
+            std::cout << "query client" << query << std::endl;
+
+            std::cout << "QUERY" << query;
+            if (query == SEND) {
+                communication.sendMessage(std::string("SEND "+interface.getMessage()), DATA);
+            } 
+            else if (query == FOLLOW) { 
+                communication.sendMessage(std::string("FOLLOW "+interface.getUsername()), DATA);
+            } 
+            else if (query == END) {
+                break;
+            }
         }
     }
 }

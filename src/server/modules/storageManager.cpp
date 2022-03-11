@@ -2,7 +2,7 @@
 
 std::map<std::string, std::set<std::string>> StorageManager::userFollowers;
 std::map<std::string, std::set<Notification>> StorageManager::userNotifications;
-std::map<std::string, std::tuple<std::string, int>> StorageManager::userPendingNotifications;
+std::map<std::string, std::set<std::tuple<std::string, int>>> StorageManager::userPendingNotifications;
 int StorageManager::seqn = 0;
 int StorageManager::id = 0;
 std::mutex StorageManager::sessionLock;
@@ -30,15 +30,26 @@ void StorageManager::addNotification(std::string username, std::string message) 
     strcpy(notification._string, message.c_str());
     
     userNotifications[username].insert(notification);
-    
+    addUserPendingNotification(username, id);
+
     sessionLock.unlock();
     // for(auto i : userNotifications[username]) {
     //     std::cout << i.id << std::endl; 
     // }
 }
 
-inline bool operator<(const Notification& lhs, const Notification& rhs)
-{
+void StorageManager::addUserPendingNotification(std::string username,int id) {
+    for (auto follower : userFollowers[username]){
+        userPendingNotifications[follower].insert(std::make_tuple(username, id));
+    }
+}
+
+
+inline bool operator<(const std::tuple<std::string, int>& lhs, const std::tuple<std::string, int>& rhs) {
+    return std::get<1>(lhs) < std::get<1>(rhs);
+}
+
+inline bool operator<(const Notification& lhs, const Notification& rhs) {
   return lhs.id < rhs.id;
 }
 

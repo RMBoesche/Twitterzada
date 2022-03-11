@@ -22,35 +22,45 @@
 
 int main(int argc, char *argv[])
 {
-	Packet recv_packet;
 	int port = MAIN_PORT + 1;
-	std::vector<std::thread> threads;
 	struct sockaddr_in cli_addr;
+	std::vector<std::thread> threads;
 
 	MainSocket mainSocket(MAIN_PORT);
 	mainSocket.startSocket();
 
 	SessionManager sessionManager;
 
+	Packet recv_packet;
+	Packet login_packet = {
+		.type = 0,
+		.seqn = 666,
+		.length = 0,
+		.timestamp = 0
+	};
+
 	while (true)
 	{
 		//request communication by the client (automatic)
-		recv_packet = CommunicationManager::recvPacket(mainSocket.getSocket(), &cli_addr);
+		recv_packet = CommunicationManager::recvPacket(mainSocket.getSocket(), cli_addr);
 
 		//request communication message content is the "username"
 		std::string username = std::string(recv_packet._payload);
-
 		
-		if(SessionManager::login(username)) {
-			//
+		if(!SessionManager::login(username)) {
+			strcpy(login_packet._payload, "failed");
+			CommunicationManager::sendPacket(login_packet, mainSocket.getSocket(), cli_addr);
+		}
+		else {
+			strcpy(login_packet._payload, "successfull");
+			CommunicationManager::sendPacket(login_packet, mainSocket.getSocket(), cli_addr);
+			
 			sessionManager.createUser(
 				username,
 				port,
 				mainSocket.getSocket(),
 				cli_addr
-			);
-
-			//
+			);			
 			port++;
 		}
 	}
