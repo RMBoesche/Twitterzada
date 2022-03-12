@@ -2,6 +2,7 @@
 
 
 void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in cli_addr) {
+	std::cout << "starting producer" << std::endl;
 
 	int seqn = 0;
 	Packet receive_packet;
@@ -37,5 +38,5 @@ void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in 
 
 	SessionManager::logout(username);
 	close(cli_sockfd);
-	std::cout << "terminando a thread" << std::endl;
+	std::cout << "finishing producer" << std::endl;
 }
