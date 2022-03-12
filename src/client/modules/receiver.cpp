@@ -1,7 +1,8 @@
 #include "receiver.h"
 
-void Receiver::operator()(Communication& communication) {
+void Receiver::start(Communication& communication) {
     Packet recv_packet;
+
 
     while(true) {
         recv_packet = communication.recvPacket();

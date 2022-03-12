@@ -29,6 +29,9 @@ public:
     static void addFollower(std::string username, std::string follower);
     static void addNotification(std::string username, std::string message);
     static void addUserPendingNotification(std::string username, int id);
+    static std::set<std::tuple<std::string, int>> getUserPendingNotifications(std::string username);
+    // static Notification getNotification(std::string username, int id);
+    static Notification getNotificationById(std::string username, int id);
 };
 
 #endif

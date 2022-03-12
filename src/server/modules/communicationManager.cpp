@@ -54,7 +54,7 @@ Packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in& cli_addr
     );
 
     if (n < 0)
-		// printf("ERROR on recvfrom");
+		printf("ERROR on recvfrom");
 
     return packet;
 }

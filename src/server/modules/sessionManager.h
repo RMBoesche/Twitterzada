@@ -1,3 +1,6 @@
+#ifndef sessionManager_def
+#define sessionManager_def
+
 #include <iostream>
 #include <mutex>
 #include <condition_variable>
@@ -17,18 +20,19 @@
 #include <string>
 #include <thread>
 #include <map>
+#include "userThread.h"
 #include "../../include/packet.h"
 
 #define MAX_USERS 2
 
 class SessionManager {
-    std::vector<std::thread> threadVector;
     static std::mutex loginMutex;
     static std::map<std::string, int> activeUsers;
 public:
     SessionManager();
     static bool login(std::string username);
     static void logout(std::string username);
-    void createUser(std::string username, int& cli_sockfd, struct sockaddr_in& cli_addr);
     ~SessionManager();
 };
+
+#endif

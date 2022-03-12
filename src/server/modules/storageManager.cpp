@@ -44,6 +44,37 @@ void StorageManager::addUserPendingNotification(std::string username,int id) {
     }
 }
 
+std::set<std::tuple<std::string, int>> StorageManager::getUserPendingNotifications(std::string username) {
+    //REMOVER -> colocar os mutex, NÃO ESQUECER
+    auto userNotifications = userPendingNotifications[username];
+
+    // // erase the already taken data
+    // for(auto it : userPendingNotifications[username]) {
+    //     std::cout << std::get<0>(it) << std::get<1>(it) << std::endl;
+    // }
+    // std::cout << "0" << std::endl;
+    // if((userPendingNotifications.find(username) != userPendingNotifications.end()) && (userPendingNotifications[username].empty() != 0)) {
+    //     std::cout << "1" << std::endl;
+    //     userPendingNotifications.erase(username);
+    //     std::cout << "2" << std::endl;
+
+    // }
+    // return the pending notifications
+    return userPendingNotifications[username];
+}
+
+Notification StorageManager::getNotificationById(std::string username, int id) {
+    for (auto notification : userNotifications[username]) {
+        if (notification.id == id) {
+            return notification;
+        }
+    }
+    std::cout << "ERROR getting notification" << std::endl;
+    // // notification.id = -1;
+    // return notification;
+}
+
+
 
 inline bool operator<(const std::tuple<std::string, int>& lhs, const std::tuple<std::string, int>& rhs) {
     return std::get<1>(lhs) < std::get<1>(rhs);

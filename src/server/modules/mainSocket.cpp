@@ -23,6 +23,7 @@ void MainSocket::startSocket() {
 }
 
 Packet MainSocket::recvPacket() {
+    std::cout << std::endl;
     int n = recvfrom(
         sockfd,
         &m_packet,

@@ -97,6 +97,7 @@ Packet Communication::recvPacket() {
     socklen_t clilen = sizeof(struct sockaddr_in);
     Packet recv_packet;
 
+    std::cout << std::endl; //REMOVER
     int n = recvfrom(
         sockfd,
         &recv_packet,
@@ -105,8 +106,10 @@ Packet Communication::recvPacket() {
         (struct sockaddr *)&serv_addr,
         &clilen
     );
-    // if (n < 0)
-	// 	printf("ERROR on recvfrom\n");
+    if (n < 0)
+		printf("ERROR on recvfrom\n");
+    
+    std::cout << "PACKET" << recv_packet._payload << std::endl;
     return recv_packet;
 }
 

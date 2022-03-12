@@ -19,6 +19,7 @@
 #include "modules/mainSocket.h"
 #include "modules/userThread.h"
 #include "modules/storageManager.h"
+#include "modules/threadManager.h"
 
 #define MAIN_PORT 4000
 
@@ -26,8 +27,7 @@ int main(int argc, char *argv[])
 {
 	int port = MAIN_PORT + 1;
 	int cli_sockfd;
-	struct sockaddr_in cli_addr;
-	std::vector<std::thread> threads;
+	struct sockaddr_in cli_addr, new_cli_addr;
 	std::string str_port;
 
 	MainSocket mainSocket(MAIN_PORT);
@@ -73,19 +73,21 @@ int main(int argc, char *argv[])
 			// send new port to be used to the user
 			CommunicationManager::sendPacket(send_packet, mainSocket.getSocket(), cli_addr);
 
-			// socklen_t clilen = sizeof(struct sockaddr_in);
 			// criar socket aqui
-			CommunicationManager::createSocket(cli_sockfd, port, cli_addr);
+			CommunicationManager::createSocket(cli_sockfd, port, new_cli_addr);
 			
-			// std::cout << cli_sockfd << " : " << ntohs(cli_addr.sin_port) << std::endl;
 			// passar socket aqui ---> producer thread
-			sessionManager.createUser(
+			ThreadManager::createProducerThread(
 				username,
-				// port, // socket
 				cli_sockfd,
-				cli_addr
+				new_cli_addr
 			);
 			
+			ThreadManager::createConsumerThread(
+				username,
+				cli_sockfd,
+				new_cli_addr
+			);
 			// passar socket aqui ---> consumer thread
 			// ...
 			// thread do consumidor
@@ -94,9 +96,6 @@ int main(int argc, char *argv[])
 			port++;
 		}
 	}
-
-	for (std::thread &t : threads)
-		t.join();
-		
+	
 	return 0;
 }
