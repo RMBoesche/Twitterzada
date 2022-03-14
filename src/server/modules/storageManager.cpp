@@ -1,5 +1,6 @@
 #include "storageManager.h"
 
+
 //==============================================================================================
 //                                      USER CLASS
 //==============================================================================================
@@ -7,6 +8,16 @@
 User::User(std::string username) 
     : name(username)
 {}
+
+User::User(std::string username, int cli_sockfd, struct sockaddr_in cli_addr) 
+    : name(username)
+{
+    this->clientData.insert({cli_sockfd, cli_addr});
+}
+
+std::map<int, struct sockaddr_in> User::getClientData() {
+    return clientData;
+}
 
 void User::addFollower(std::string newFollower) {
     sessionLock.lock();
@@ -34,17 +45,15 @@ void User::addNotification(std::string message, int id) {
 
 void User::addFollowersPendingNotification(int id) {
     sessionLock.lock();
+
     for (auto follower : followers){
         StorageManager::getUser(follower)->startProduction();
 
-        std::cout << "pre pending notification" << std::endl;
-
         StorageManager::getUser(follower)->addPendingNotification(name, id);
-
-        std::cout << "pos pending notification" << std::endl;
 
         StorageManager::getUser(follower)->endProduction();
     }
+    
     sessionLock.unlock();
 }
 
@@ -72,32 +81,27 @@ Notification User::getUserPendingNotification() {
         });
     }
 
-    // if(!(pendingNotifications.empty())) {
 
-        // get the first message to be sent
-        auto pendingNotification = pendingNotifications.front();
-        // remove it from the list
-        pendingNotifications.pop();
+    // get the first message to be sent
+    auto pendingNotification = pendingNotifications.front();
+    // remove it from the list
+    pendingNotifications.pop();
 
-        std::string userInfluencer = std::get<0>(pendingNotification);
-        int id = std::get<1>(pendingNotification);
+    std::string userInfluencer = std::get<0>(pendingNotification);
+    int id = std::get<1>(pendingNotification);
 
-        Notification notification;
-        std::cout << "pre get notification" << std::endl;
-        std::cout << userInfluencer << " " << id << std::endl;
-        
-        notification = StorageManager::getUser(userInfluencer)->getNotificationById(id);
-        
-        std::cout << "pos get notification" << std::endl;
-        
-        produced--;
-        if(produced == 0) {
-            ready = false;
-        }
-        ul.unlock();
+    Notification notification;
+    
+    notification = StorageManager::getUser(userInfluencer)->getNotificationById(id);
+    
+    produced--;
+    if(produced == 0) {
+        ready = false;
+    }
+    ul.unlock();
 
-        return notification;
-    // }
+    return notification;
+
     std::cout << "NÃO TEM NOTIFICACAO" << std::endl;
     ul.unlock();
 }
@@ -114,6 +118,16 @@ Notification User::getNotificationById(int id) {
     }
     notificationLock.unlock();
     std::cout << "ERROR getting notification" << std::endl;
+}
+
+void User::removeClient(int sockfd) {
+    clientData.erase(
+        clientData.find(sockfd)
+    );
+}
+
+void User::setClientData(int cli_sockfd, struct sockaddr_in cli_addr) {
+    clientData.insert({cli_sockfd, cli_addr});
 }
 
 inline bool operator==(const Notification& lhs, const Notification& rhs) {
@@ -143,6 +157,16 @@ void StorageManager::addUser(std::string username) {
     }
 }
 
+void StorageManager::addUser(std::string username, int cli_sockfd, struct sockaddr_in& cli_addr) {
+    if(users.find(username) == users.end()) {
+        users.insert({username, new User(username, cli_sockfd, cli_addr)});
+    }
+    else {
+        users[username]->setClientData(cli_sockfd, cli_addr);
+    }
+}
+
+
 void StorageManager::addFollower(std::string username, std::string follower) {
     if(users.find(username) == users.end())
         addUser(username);
@@ -171,4 +195,19 @@ void StorageManager::incrementSeqn() {
     seqn++;
 }
 
+void StorageManager::sendNotification(std::string username, Packet notificationPacket) {
+    auto clientData = users[username]->getClientData();
+    for (auto data = clientData.begin(); data != clientData.end(); data++) {
+        std::cout << data->first << ntohs(data->second.sin_port) << std::endl; 
+        CommunicationManager::sendPacket(notificationPacket, data->first, data->second);
+    }
 
+}
+
+void StorageManager::removeClient(std::string username, int cli_sockfd) {
+    users[username]->removeClient(cli_sockfd);
+}
+
+void StorageManager::setClientData(std::string username, int cli_sockfd, struct sockaddr_in& cli_addr) {
+    users[username]->setClientData(cli_sockfd, cli_addr);
+}

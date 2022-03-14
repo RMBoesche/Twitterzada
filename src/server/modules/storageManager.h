@@ -12,53 +12,72 @@
 #include <condition_variable>
 #include <algorithm>
 
-// #include "user.h"
+#include "communicationManager.h"
 
 #include "../../include/packet.h"
 #include "../../include/notification.h"
 
 class User {
+    std::string name;
+    std::map<int, struct sockaddr_in> clientData;
+
     std::set<std::string> followers;
     std::vector<Notification> notifications;
     std::queue< std::tuple< std::string, int >> pendingNotifications;
+
     std::mutex sessionLock;
     std::mutex notificationLock;
+
     std::mutex pendingNotificationLock;
     std::condition_variable cv;
     bool ready;
     int produced;
-    std::string name;
 
 public:
     User(std::string username);
+    User(std::string username, int cli_sockfd, struct sockaddr_in cli_addr);
+
+    std::map<int, struct sockaddr_in> getClientData();
+
     void addFollower(std::string newFollower);
     void addNotification(std::string message, int id);
-    void addFollowersPendingNotification(int id); //*
-    void addPendingNotification(std::string username, int id); //*
+    void addFollowersPendingNotification(int id);
+    void addPendingNotification(std::string username, int id);
+    
+    void setClientData(int cli_sockfd, struct sockaddr_in cli_addr);
+    void removeClient(int cli_sockfd);
+
     Notification getUserPendingNotification();
     Notification getNotificationById(int id);
+
     void startProduction();
     void endProduction();
 };
 
 class StorageManager {
-
     static std::map<std::string, User*> users;
 
     static int seqn;
     static int id;
 
 public:
+    static User* getUser(std::string username);
+    static void setClientData(std::string username, int cli_sockfd, struct sockaddr_in& cli_addr);
     static int getSeqn();
-    static void addUser(std::string username);
     static void incrementSeqn();
+
+    static void addUser(std::string username);
+    static void addUser(std::string username, int cli_sockfd, struct sockaddr_in& cli_addr);
     static void addFollower(std::string username, std::string follower);
     static void addNotification(std::string username, std::string message);
     static void addFollowersPendingNotification(std::string username, int id);
+
     static Notification getUserPendingNotification(std::string username);
     static Notification getNotificationById(std::string username, int id);
-    static User* getUser(std::string username);
-};
 
+    static void sendNotification(std::string username, Packet notificationPacket);
+    static void removeClient(std::string username, int cli_sockfd);
+    
+};
 
 #endif
