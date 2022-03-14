@@ -1,112 +1,120 @@
 #include "storageManager.h"
 
-std::map<std::string, std::set<std::string>> StorageManager::userFollowers;
-std::map<std::string, std::vector<Notification>> StorageManager::userNotifications;
-std::map<std::string, std::queue<std::tuple<std::string, int>>> StorageManager::userPendingNotifications;
-int StorageManager::seqn = 0;
-int StorageManager::id = 0;
-std::mutex StorageManager::sessionLock;
-std::mutex StorageManager::notificationLock;
-std::mutex StorageManager::pendingNotificationLock;
-std::condition_variable StorageManager::cv;
-bool StorageManager::ready = false;
+//==============================================================================================
+//                                      USER CLASS
+//==============================================================================================
 
+User::User(std::string username) 
+    : name(username)
+{}
 
-void StorageManager::addFollower(std::string username, std::string follower) {
+void User::addFollower(std::string newFollower) {
     sessionLock.lock();
-    userFollowers[username].insert(follower);
+    followers.insert(newFollower);
     sessionLock.unlock();
-    // for(auto itr = userFollowers[username].begin(); itr!= userFollowers[user].end(); itr++)
-    //     std::cout << *itr << std::endl;
 }
 
-void StorageManager::addNotification(std::string username, std::string message) {
-    sessionLock.lock();
-
-    id++;
-
+void User::addNotification(std::string message, int id) {
+    
     Notification notification = {
         .id = id,
         .timestamp = std::time(0),
         .length = message.length(),
-        .pending = userFollowers[username].empty() ? userFollowers[username].size() : 0,
+        .pending = followers.empty() ? 0 : followers.size(),
     };
 
     strcpy(notification._string, message.c_str());
-    
+
     notificationLock.lock();
-    userNotifications[username].push_back(notification);
+    notifications.push_back(notification);
     notificationLock.unlock();
 
-    addFollowersPendingNotification(username, id);
+    addFollowersPendingNotification(id);
+}
 
+void User::addFollowersPendingNotification(int id) {
+    sessionLock.lock();
+    for (auto follower : followers){
+        StorageManager::getUser(follower)->startProduction();
+
+        std::cout << "pre pending notification" << std::endl;
+
+        StorageManager::getUser(follower)->addPendingNotification(name, id);
+
+        std::cout << "pos pending notification" << std::endl;
+
+        StorageManager::getUser(follower)->endProduction();
+    }
     sessionLock.unlock();
 }
 
-void StorageManager::addFollowersPendingNotification(std::string username,int id) {
-    //PRODUCER
-    for (auto follower : userFollowers[username]){
-        // pendingNotificationLock.lock();
-        std::unique_lock<std::mutex> ul(pendingNotificationLock);
-
-        userPendingNotifications[follower].push(std::make_tuple(username, id));
-        
-        ready = true;
-        ul.unlock();
-        cv.notify_all();
-    }
+void User::startProduction() {
+    pendingNotificationLock.lock();
 }
 
-Notification StorageManager::getUserPendingNotification(std::string username) {
+void User::endProduction() {
+    produced++;
+    ready = true;
+    pendingNotificationLock.unlock();
+    cv.notify_all();
+}
 
+void User::addPendingNotification(std::string username, int id) {
+    pendingNotifications.push(std::make_tuple(username, id));
+}
+
+Notification User::getUserPendingNotification() {
+    
     std::unique_lock<std::mutex> ul(pendingNotificationLock);
-    
-    cv.wait(ul, []() {
-        return ready;
-    });
+    while(produced == 0) {
+        cv.wait(ul, [&]() {
+            return ready;
+        });
+    }
 
-    auto userPendingNotification = userPendingNotifications[username].front();
+    // if(!(pendingNotifications.empty())) {
 
-    std::string userInfluencer = std::get<0>(userPendingNotification);
-    int id = std::get<1>(userPendingNotification);
+        // get the first message to be sent
+        auto pendingNotification = pendingNotifications.front();
+        // remove it from the list
+        pendingNotifications.pop();
 
-    Notification notification;
-    notification = getNotificationById(userInfluencer, id);
-    
-    userPendingNotifications[username].pop();
+        std::string userInfluencer = std::get<0>(pendingNotification);
+        int id = std::get<1>(pendingNotification);
 
-    std::cout << "1" << std::endl;
-    ready = false;
+        Notification notification;
+        std::cout << "pre get notification" << std::endl;
+        std::cout << userInfluencer << " " << id << std::endl;
+        
+        notification = StorageManager::getUser(userInfluencer)->getNotificationById(id);
+        
+        std::cout << "pos get notification" << std::endl;
+        
+        produced--;
+        if(produced == 0) {
+            ready = false;
+        }
+        ul.unlock();
+
+        return notification;
+    // }
+    std::cout << "NÃO TEM NOTIFICACAO" << std::endl;
     ul.unlock();
-    std::cout << "2" << std::endl;
-
-    return notification;
 }
 
-Notification StorageManager::getNotificationById(std::string username, int id) {
+Notification User::getNotificationById(int id) {
+
     notificationLock.lock();
-    for (auto& notification : userNotifications[username]) {
-        if (notification.id == id) {
+    for (auto& notification : notifications) {
+        if ((notification.id == id) && (notification.pending > 0)) {
             notification.pending--;
+            notificationLock.unlock();
             return notification;
         }
     }
     notificationLock.unlock();
     std::cout << "ERROR getting notification" << std::endl;
 }
-
-// void StorageManager::decrementNotificationPending(std::string username, Notification notification) {
-//     Notification notificationCopy = notification; 
-//     notification.pending--;
-
-//     notificationLock.lock();
-//     std::replace(userNotifications[username].begin(),
-//         userNotifications[username].end(),
-//         notificationCopy,
-//         notification
-//         );
-//     notificationLock.unlock();
-// }
 
 inline bool operator==(const Notification& lhs, const Notification& rhs) {
     return lhs.id == rhs.id;
@@ -120,6 +128,41 @@ inline bool operator<(const Notification& lhs, const Notification& rhs) {
   return lhs.id < rhs.id;
 }
 
+//==============================================================================================
+//                                     STORAGE MANAGER CLASS
+//==============================================================================================
+
+
+int StorageManager::seqn = 0;
+int StorageManager::id = 0;
+std::map<std::string, User*> StorageManager::users;
+
+void StorageManager::addUser(std::string username) {
+    if(users.find(username) == users.end()) {
+        users.insert({username, new User(username)});
+    }
+}
+
+void StorageManager::addFollower(std::string username, std::string follower) {
+    if(users.find(username) == users.end())
+        addUser(username);
+    users[username]->addFollower(follower);
+}
+
+void StorageManager::addNotification(std::string username, std::string message) {
+    id++;
+    users[username]->addNotification(message, id);
+}
+
+Notification StorageManager::getUserPendingNotification(std::string username) {
+    return users[username]->getUserPendingNotification();
+
+}
+
+User* StorageManager::getUser(std::string username) {
+    return users[username];
+}
+
 int StorageManager::getSeqn() {
     return seqn;
 }
@@ -127,3 +170,5 @@ int StorageManager::getSeqn() {
 void StorageManager::incrementSeqn() {
     seqn++;
 }
+
+

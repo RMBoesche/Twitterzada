@@ -3,6 +3,8 @@
 
 void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in cli_addr) {
 	std::cout << "starting producer" << std::endl;
+	
+	StorageManager::addUser(username);
 
 	int seqn = 0;
 	Packet receive_packet;
