@@ -43,7 +43,7 @@ Packet CommunicationManager::recvPacket(int sockfd, struct sockaddr_in& cli_addr
     socklen_t clilen = sizeof(struct sockaddr_in);
     Packet packet;
 
-    std::cout << std::endl;
+    std::cout << std::flush;
     int n = recvfrom(
         sockfd,
         &packet,

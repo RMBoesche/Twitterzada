@@ -30,6 +30,9 @@ int main(int argc, char *argv[])
 	struct sockaddr_in cli_addr, new_cli_addr;
 	std::string str_port;
 
+	// read data from files
+	StorageManager::recoverState();
+
 	MainSocket mainSocket(MAIN_PORT);
 	mainSocket.startSocket();
 
@@ -43,6 +46,7 @@ int main(int argc, char *argv[])
 		.length = 0,
 		.timestamp = 0
 	};
+
  
 	while (true)
 	{
@@ -75,7 +79,7 @@ int main(int argc, char *argv[])
 
 			// criar socket aqui
 			CommunicationManager::createSocket(cli_sockfd, port, new_cli_addr);
-			
+
 			// passar socket aqui ---> producer thread
 			ThreadManager::createProducerThread(
 				username,
@@ -96,6 +100,5 @@ int main(int argc, char *argv[])
 			port++;
 		}
 	}
-	
 	return 0;
 }

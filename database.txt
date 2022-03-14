@@ -1,0 +1,5 @@
+alexandre,[gabriel,rodrigo]
+arthur,[gabriel,lucas]
+gabriel,[alexandre,arthur,lucas,rodrigo]
+lucas,[gabriel,rodrigo]
+rodrigo,[alexandre,arthur,gabriel,lucas]

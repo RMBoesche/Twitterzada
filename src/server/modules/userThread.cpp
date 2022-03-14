@@ -1,8 +1,6 @@
 #include "userThread.h"
 
-
 void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in cli_addr) {
-	std::cout << "starting producer" << std::endl;
 	
 	StorageManager::addUser(username);
 
@@ -21,27 +19,26 @@ void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in 
 
 	while (true)
 	{
+		receive_packet = CommunicationManager::recvPacket(cli_sockfd, cli_addr);
+
 		int query = CommunicationManager::getQuery(receive_packet._payload);
 		// std::cout << query << std::endl;
 		if(query == SEND) {
 			//...
-			std::cout << "send";
+			std::cout << username << " sent: " << CommunicationManager::getContent(receive_packet._payload) << std::endl;
 			StorageManager::addNotification(username, CommunicationManager::getContent(receive_packet._payload));
 		}
 		else if(query == FOLLOW) {
-			std::cout << "follow";
+			std::cout << username << " followed " << CommunicationManager::getContent(receive_packet._payload) << std::endl;
 			// add the follower to the user
 			StorageManager::addFollower(CommunicationManager::getContent(receive_packet._payload), username);
+			StorageManager::saveState();
 		}
 		else if(query == END) {
-			break;
+			StorageManager::removeClient(username, cli_sockfd);
+			SessionManager::logout(username);
+			close(cli_sockfd);
+			std::terminate();
 		}
-
-		receive_packet = CommunicationManager::recvPacket(cli_sockfd, cli_addr);
 	}
-
-	StorageManager::removeClient(username, cli_sockfd);
-	SessionManager::logout(username);
-	close(cli_sockfd);
-	std::cout << "finishing producer" << std::endl;
 }

@@ -25,7 +25,7 @@ int Interface::getQuery() {
     else if (query == std::string("FOLLOW")) {
         return FOLLOW;
     }
-    else if(query == std::string("end")) {
+    else if(query == std::string("END")) {
         return END;
     }
     else {

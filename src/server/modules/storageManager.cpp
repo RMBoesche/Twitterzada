@@ -1,6 +1,5 @@
 #include "storageManager.h"
 
-
 //==============================================================================================
 //                                      USER CLASS
 //==============================================================================================
@@ -22,6 +21,9 @@ std::map<int, struct sockaddr_in> User::getClientData() {
 void User::addFollower(std::string newFollower) {
     sessionLock.lock();
     followers.insert(newFollower);
+
+    // updateFollowersFile();
+
     sessionLock.unlock();
 }
 
@@ -130,6 +132,14 @@ void User::setClientData(int cli_sockfd, struct sockaddr_in cli_addr) {
     clientData.insert({cli_sockfd, cli_addr});
 }
 
+std::string User::getUsername() {
+    return name;
+}
+
+std::set<std::string> User::getFollowers() {
+    return followers;
+}
+
 inline bool operator==(const Notification& lhs, const Notification& rhs) {
     return lhs.id == rhs.id;
 }
@@ -150,6 +160,7 @@ inline bool operator<(const Notification& lhs, const Notification& rhs) {
 int StorageManager::seqn = 0;
 int StorageManager::id = 0;
 std::map<std::string, User*> StorageManager::users;
+std::mutex StorageManager::saveLock;
 
 void StorageManager::addUser(std::string username) {
     if(users.find(username) == users.end()) {
@@ -159,10 +170,7 @@ void StorageManager::addUser(std::string username) {
 
 void StorageManager::addUser(std::string username, int cli_sockfd, struct sockaddr_in& cli_addr) {
     if(users.find(username) == users.end()) {
-        users.insert({username, new User(username, cli_sockfd, cli_addr)});
-    }
-    else {
-        users[username]->setClientData(cli_sockfd, cli_addr);
+        users.insert({username, new User(username)});
     }
 }
 
@@ -172,6 +180,7 @@ void StorageManager::addFollower(std::string username, std::string follower) {
         addUser(username);
     users[username]->addFollower(follower);
 }
+
 
 void StorageManager::addNotification(std::string username, std::string message) {
     id++;
@@ -197,8 +206,8 @@ void StorageManager::incrementSeqn() {
 
 void StorageManager::sendNotification(std::string username, Packet notificationPacket) {
     auto clientData = users[username]->getClientData();
-    for (auto data = clientData.begin(); data != clientData.end(); data++) {
-        std::cout << data->first << ntohs(data->second.sin_port) << std::endl; 
+    for (auto data = clientData.begin(); data != clientData.end(); ++data) {
+        // std::cout << data->first << ntohs(data->second.sin_port) << std::endl; 
         CommunicationManager::sendPacket(notificationPacket, data->first, data->second);
     }
 
@@ -210,4 +219,75 @@ void StorageManager::removeClient(std::string username, int cli_sockfd) {
 
 void StorageManager::setClientData(std::string username, int cli_sockfd, struct sockaddr_in& cli_addr) {
     users[username]->setClientData(cli_sockfd, cli_addr);
+}
+
+void StorageManager::recoverState() {
+    // ifstream followersFile("../../database.csv");
+    std::ifstream followersFile("database.txt");
+    std::string line;
+
+    if(followersFile.is_open()) {
+        while(getline(followersFile, line)) {
+            // remove spaces
+            // line.erase(
+            //     std::remove(
+            //         line.begin(),
+            //         line.end(),
+            //         ' '
+            //     ),
+            //     line.end()
+            // );
+            // std::cout << line << std::endl;
+
+            std::string username = line.substr(0, line.find(','));
+            // std::cout << "username: " << username << std::endl;
+
+            std::string stringFollowers = line.substr(line.find('['), line.find(']'));
+            // std::cout << stringFollowers <<  std::endl;
+
+            // if there is at least one follower
+            if(stringFollowers.length() > 2) {
+                stringFollowers = stringFollowers.substr(1, stringFollowers.size()-2);
+
+                // std::cout << stringFollowers << std::endl;
+
+                std::istringstream streamFollowers(stringFollowers);
+                std::string follower;
+                while(getline(streamFollowers, follower, ',')) {
+                    
+                    addFollower(username, follower);
+                }
+            }
+        }
+    }
+    else {
+        std::cout << "ERRO LENDO ARQUIVO" << std::endl;
+    }
+    followersFile.close();
+}
+
+void StorageManager::saveState() {
+    saveLock.lock();
+
+    std::ifstream followersFile("database.txt");
+    std::ofstream newFile("temporaryFile.txt");
+
+    std::string line;
+    if(followersFile.is_open() && newFile.is_open()) {
+        for(auto const& user : users) {
+            line = user.second->getUsername() + ",[";
+            
+            for (auto follower : user.second->getFollowers()) 
+                line += follower + ",";     
+                
+            line = line.substr(0, line.size()-1) + "]\n";
+
+            newFile << line;
+        }
+        rename("temporaryFile.txt", "database.txt");
+    }
+    followersFile.close();
+    newFile.close();
+
+    saveLock.unlock();
 }

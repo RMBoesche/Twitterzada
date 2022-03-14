@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
 
         std::cout << "Login Successful!" << std::endl;
         communication.recvPort();
+        
+        communication.sendMessage(std::string("dumb"), DATA);
 
         std::thread listenerThread(Receiver::start, std::ref(communication));
         

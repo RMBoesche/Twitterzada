@@ -11,11 +11,17 @@
 #include <mutex>
 #include <condition_variable>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 #include "communicationManager.h"
 
 #include "../../include/packet.h"
 #include "../../include/notification.h"
+
+//==============================================================================================
+//                                        USER CLASS
+//==============================================================================================
 
 class User {
     std::string name;
@@ -37,6 +43,8 @@ public:
     User(std::string username);
     User(std::string username, int cli_sockfd, struct sockaddr_in cli_addr);
 
+    std::string getUsername();
+    std::set<std::string> getFollowers();
     std::map<int, struct sockaddr_in> getClientData();
 
     void addFollower(std::string newFollower);
@@ -52,11 +60,20 @@ public:
 
     void startProduction();
     void endProduction();
+
+    void updateFollowersFile(std::string);
 };
+
+//==============================================================================================
+//                                     STORAGE MANAGER CLASS
+//==============================================================================================
+
+
 
 class StorageManager {
     static std::map<std::string, User*> users;
 
+    static std::mutex saveLock;
     static int seqn;
     static int id;
 
@@ -78,6 +95,8 @@ public:
     static void sendNotification(std::string username, Packet notificationPacket);
     static void removeClient(std::string username, int cli_sockfd);
     
+    static void recoverState();
+    static void saveState();
 };
 
 #endif
