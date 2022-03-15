@@ -13,9 +13,10 @@ void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in 
 	
 	// .....................................
 	// REMOVER tem que na vdd aceitar 2 valores, 1 pra cada sessão, caso 2 usuarios entrem na mesma conta
-	// ThreadManager::setCli_addr(username, cli_addr);
 	
 	StorageManager::setClientData(username, cli_sockfd, cli_addr);
+
+	//PRONTO PRA SER CONSUMIDO
 
 	while (true)
 	{
@@ -35,10 +36,10 @@ void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in 
 			StorageManager::saveState();
 		}
 		else if(query == END) {
-			StorageManager::removeClient(username, cli_sockfd);
 			SessionManager::logout(username);
 			close(cli_sockfd);
-			std::terminate();
+			StorageManager::removeClient(username, cli_sockfd);
+			break;
 		}
 	}
 }

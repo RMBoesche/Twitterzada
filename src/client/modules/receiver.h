@@ -12,5 +12,5 @@
 class Receiver {
     struct sockaddr_in from;
 public:
-    static void start(Communication& communication);
+    static void start(Communication& communication, int& exit);
 };

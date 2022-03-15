@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 
-void NotificationThread::sendNotificationsToUser(std::string username, int cli_sockfd, struct sockaddr_in cli_addr) {
+void NotificationThread::sendNotificationsToUser(std::string username) {
 
     while(true) {            
         Notification notificationToSend = StorageManager::getUserPendingNotification(username);

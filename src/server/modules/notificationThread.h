@@ -8,7 +8,7 @@
 
 class NotificationThread {
 public:
-    static void sendNotificationsToUser(std::string username, int cli_sockfd, struct sockaddr_in cli_addr);
+    static void sendNotificationsToUser(std::string username);
 };
 
 #endif

@@ -14,7 +14,7 @@ class ThreadManager {
 
 public:
     static void createProducerThread(std::string username, int& cli_sockfd, struct sockaddr_in& cli_addr);
-    static void createConsumerThread(std::string username, int& cli_sockfd, struct sockaddr_in& cli_addr);
+    static void createConsumerThread(std::string username);
     static struct sockaddr_in getCli_addr(std::string);
     static void setCli_addr(std::string, struct sockaddr_in);
 };

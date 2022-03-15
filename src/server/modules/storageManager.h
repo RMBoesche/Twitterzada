@@ -68,8 +68,6 @@ public:
 //                                     STORAGE MANAGER CLASS
 //==============================================================================================
 
-
-
 class StorageManager {
     static std::map<std::string, User*> users;
 

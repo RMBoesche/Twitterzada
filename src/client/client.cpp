@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     std::string username = argv[1];
     const char* server = argv[2];
     int port = atoi(argv[3]);
-
+    int exit = 0;
     // create the interface
     Interface interface;
     Communication communication(username, port, gethostbyname(server));
@@ -48,12 +48,12 @@ int main(int argc, char *argv[])
 
         std::cout << "Login Successful!" << std::endl;
         communication.recvPort();
-        
+
         communication.sendMessage(std::string("dumb"), DATA);
 
-        std::thread listenerThread(Receiver::start, std::ref(communication));
+        std::thread listenerThread(Receiver::start, std::ref(communication), std::ref(exit));
         
-        while (true)
+        while (!exit)
         {
             interface.setInput();
 
@@ -67,8 +67,11 @@ int main(int argc, char *argv[])
                 communication.sendMessage(std::string("FOLLOW "+interface.getUsername()), DATA);
             } 
             else if (query == END) {
-                break;
+                communication.sendMessage(std::string("END"), DATA);
+                exit = 1;
+
             }
         }
+        
     }
 }

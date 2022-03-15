@@ -35,8 +35,9 @@ void User::addNotification(std::string message, int id) {
         .length = message.length(),
         .pending = followers.empty() ? 0 : followers.size(),
     };
-
     strcpy(notification._string, message.c_str());
+
+    std::cout << "initial pending: " << notification.pending << std::endl;
 
     notificationLock.lock();
     notifications.push_back(notification);
@@ -103,9 +104,6 @@ Notification User::getUserPendingNotification() {
     ul.unlock();
 
     return notification;
-
-    std::cout << "NÃO TEM NOTIFICACAO" << std::endl;
-    ul.unlock();
 }
 
 Notification User::getNotificationById(int id) {
@@ -114,6 +112,7 @@ Notification User::getNotificationById(int id) {
     for (auto& notification : notifications) {
         if ((notification.id == id) && (notification.pending > 0)) {
             notification.pending--;
+            std::cout << "pending " << notification.pending << std::endl;
             notificationLock.unlock();
             return notification;
         }
@@ -228,28 +227,14 @@ void StorageManager::recoverState() {
 
     if(followersFile.is_open()) {
         while(getline(followersFile, line)) {
-            // remove spaces
-            // line.erase(
-            //     std::remove(
-            //         line.begin(),
-            //         line.end(),
-            //         ' '
-            //     ),
-            //     line.end()
-            // );
-            // std::cout << line << std::endl;
 
             std::string username = line.substr(0, line.find(','));
-            // std::cout << "username: " << username << std::endl;
 
             std::string stringFollowers = line.substr(line.find('['), line.find(']'));
-            // std::cout << stringFollowers <<  std::endl;
 
             // if there is at least one follower
             if(stringFollowers.length() > 2) {
                 stringFollowers = stringFollowers.substr(1, stringFollowers.size()-2);
-
-                // std::cout << stringFollowers << std::endl;
 
                 std::istringstream streamFollowers(stringFollowers);
                 std::string follower;

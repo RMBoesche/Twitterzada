@@ -14,13 +14,11 @@ void ThreadManager::createProducerThread(std::string username, int& cli_sockfd, 
 	);
 }
 
-void ThreadManager::createConsumerThread(std::string username, int& cli_sockfd, struct sockaddr_in& cli_addr) {
+void ThreadManager::createConsumerThread(std::string username) {
 	// std::cout << cli_addr.sin_port << std::endl;
 	threadVector.emplace_back(
 		NotificationThread::sendNotificationsToUser,
-		username,
-		cli_sockfd,
-		cli_addr
+		username
 	);
 }
 

@@ -77,25 +77,11 @@ int main(int argc, char *argv[])
 			// send new port to be used to the user
 			CommunicationManager::sendPacket(send_packet, mainSocket.getSocket(), cli_addr);
 
-			// criar socket aqui
 			CommunicationManager::createSocket(cli_sockfd, port, new_cli_addr);
 
-			// passar socket aqui ---> producer thread
-			ThreadManager::createProducerThread(
-				username,
-				cli_sockfd,
-				new_cli_addr
-			);
-			
-			ThreadManager::createConsumerThread(
-				username,
-				cli_sockfd,
-				new_cli_addr
-			);
-			// passar socket aqui ---> consumer thread
-			// ...
-			// thread do consumidor
-			// ...
+			ThreadManager::createProducerThread(username, cli_sockfd, new_cli_addr);
+
+			ThreadManager::createConsumerThread(username);
 
 			port++;
 		}

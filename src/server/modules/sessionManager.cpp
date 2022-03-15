@@ -31,6 +31,7 @@ void SessionManager::logout(std::string username) {
 	// logout user
 	loginMutex.lock();
 	activeUsers[username]--;
+	std::cout << activeUsers[username] << std::endl;
 	loginMutex.unlock();
 }
 
