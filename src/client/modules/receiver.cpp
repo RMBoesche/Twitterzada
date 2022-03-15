@@ -5,6 +5,6 @@ void Receiver::start(Communication& communication, int& exit) {
 
     while(!exit) {
         recv_packet = communication.recvPacket();
-        std::cout << "\n\nNOTIFICATION: " << recv_packet._payload << std::endl;
+        std::cout << "\n\n" << recv_packet._payload << std::endl;
     }
 }

@@ -35,7 +35,7 @@ void User::addNotification(std::string message, int id) {
         .length = message.length(),
         .pending = followers.empty() ? 0 : followers.size(),
     };
-    strcpy(notification._string, message.c_str());
+    strcpy(notification._string, (name + ": " + message).c_str());
 
     std::cout << "initial pending: " << notification.pending << std::endl;
 
@@ -84,26 +84,29 @@ Notification User::getUserPendingNotification() {
         });
     }
 
+    if(!clientData.empty()) {
 
-    // get the first message to be sent
-    auto pendingNotification = pendingNotifications.front();
-    // remove it from the list
-    pendingNotifications.pop();
 
-    std::string userInfluencer = std::get<0>(pendingNotification);
-    int id = std::get<1>(pendingNotification);
+        // get the first message to be sent
+        auto pendingNotification = pendingNotifications.front();
+        // remove it from the list
+        pendingNotifications.pop();
 
-    Notification notification;
-    
-    notification = StorageManager::getUser(userInfluencer)->getNotificationById(id);
-    
-    produced--;
-    if(produced == 0) {
-        ready = false;
+        std::string userInfluencer = std::get<0>(pendingNotification);
+        int id = std::get<1>(pendingNotification);
+
+        Notification notification;
+        
+        notification = StorageManager::getUser(userInfluencer)->getNotificationById(id);
+        
+        produced--;
+        if(produced == 0) {
+            ready = false;
+        }
+        ul.unlock();
+
+        return notification;
     }
-    ul.unlock();
-
-    return notification;
 }
 
 Notification User::getNotificationById(int id) {

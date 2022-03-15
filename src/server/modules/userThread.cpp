@@ -16,7 +16,7 @@ void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in 
 	
 	StorageManager::setClientData(username, cli_sockfd, cli_addr);
 
-	//PRONTO PRA SER CONSUMIDO
+	//PRONTO PRA SER CONSUMIDO - FUNCIONOU!!!!
 
 	while (true)
 	{
