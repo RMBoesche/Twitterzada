@@ -11,6 +11,8 @@
 #define SEND 0
 #define FOLLOW 1
 #define END 2
+#define MAIN_PORT 4000
+#define N_SERVERS_R 5
 
 class CommunicationManager {
 public:
@@ -19,6 +21,7 @@ public:
     static std::string getContent(std::string);
     static Packet recvPacket(int sockfd, struct sockaddr_in& cli_addr);
     static void sendPacket(Packet& send_packet, int sockfd, struct sockaddr_in& );
+    static void sendMulticast(Packet& send_packet, int sockfd, int min);
 };
 
 #endif

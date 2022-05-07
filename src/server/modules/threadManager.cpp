@@ -1,4 +1,4 @@
-#include "threadManager.h"
+3#include "threadManager.h"
 
 std::vector<std::thread> ThreadManager::threadVector;
 std::map<std::string, struct sockaddr_in> ThreadManager::userCli_addr;
@@ -21,7 +21,6 @@ void ThreadManager::createConsumerThread(std::string username) {
 		username
 	);
 }
-
 
 struct sockaddr_in ThreadManager::getCli_addr(std::string username) {
 	return userCli_addr[username];

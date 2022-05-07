@@ -97,7 +97,7 @@ Packet Communication::recvPacket() {
     socklen_t clilen = sizeof(struct sockaddr_in);
     Packet recv_packet;
 
-    std::cout << std::flush; //REMOVER
+    //std::cout << std::flush; //REMOVER
     int n = recvfrom(
         sockfd,
         &recv_packet,

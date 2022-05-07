@@ -1,5 +1,8 @@
 #include "communicationManager.h"
 #include "../../include/packet.h"
+#include <arpa/inet.h>
+
+
 
 void CommunicationManager::createSocket(int& cli_sockfd, int port, struct sockaddr_in& thread_addr) {
 	if ((cli_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
@@ -67,3 +70,17 @@ void CommunicationManager::sendPacket(Packet& packet, int sockfd, struct sockadd
     }
 }
 
+void CommunicationManager::sendMulticast(Packet& packet, int sockfd, int min) {
+    
+    struct sockaddr_in serv_addr;
+
+    serv_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(serv_addr.sin_zero), 8);
+
+    for (int port = min+1 ; port <= MAIN_PORT + N_SERVERS_R; port++) {
+	    serv_addr.sin_port = htons(port);
+        sendPacket(packet, sockfd, serv_addr)
+    }
+
+}
