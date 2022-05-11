@@ -30,3 +30,9 @@ struct sockaddr_in ThreadManager::getCli_addr(std::string username) {
 void ThreadManager::setCli_addr(std::string username, struct sockaddr_in cli_addr) {
 	userCli_addr[username] = cli_addr;
 }
+
+void ThreadManager::startListen() {
+	threadVector.emplace_back(
+		serverReplica::listen
+	);
+}

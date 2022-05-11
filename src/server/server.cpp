@@ -20,8 +20,9 @@
 #include "modules/userThread.h"
 #include "modules/storageManager.h"
 #include "modules/threadManager.h"
+#include "modules/serverReplica.h"
 
-#define MAIN_PORT 4000
+#define MAIN_PORT 5000
 
 int main(int argc, char *argv[])
 {
@@ -33,8 +34,14 @@ int main(int argc, char *argv[])
 	// read data from files
 	StorageManager::recoverState();
 
-	MainSocket mainSocket(MAIN_PORT);
+	
+	// start servers
+	serverReplica::start();
+
+	MainSocket mainSocket(4000);
 	mainSocket.startSocket();
+
+	std::cout << "SOCKET: " << mainSocket.getSocket() << std::endl;
 
 	SessionManager sessionManager;
 

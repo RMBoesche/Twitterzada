@@ -2,7 +2,7 @@
 #include "../../include/packet.h"
 
 void CommunicationManager::createSocket(int& cli_sockfd, int port, struct sockaddr_in& thread_addr) {
-	if ((cli_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	if ((cli_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
 		printf("ERROR opening socket");
 
 	thread_addr.sin_family = AF_INET;
@@ -66,4 +66,5 @@ void CommunicationManager::sendPacket(Packet& packet, int sockfd, struct sockadd
         std::cout << "ERROR sendto" << std::endl;
     }
 }
+
 

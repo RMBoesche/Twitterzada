@@ -266,9 +266,12 @@ void StorageManager::saveState() {
             line = user.second->getUsername() + ",[";
             
             for (auto follower : user.second->getFollowers()) 
-                line += follower + ",";     
-                
-            line = line.substr(0, line.size()-1) + "]\n";
+                line += follower + ",";   
+
+            if(line[line.length() - 1] != '[')
+                line = line.substr(0, line.size()-1);
+            
+            line += "]\n";
 
             newFile << line;
         }

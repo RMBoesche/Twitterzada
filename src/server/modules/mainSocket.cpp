@@ -7,7 +7,7 @@ MainSocket::MainSocket(int port)
     clilen = sizeof(struct sockaddr_in);
 }
 
-void MainSocket::startSocket() {
+bool MainSocket::startSocket() {
 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
 		printf("ERROR opening socket");
@@ -17,9 +17,11 @@ void MainSocket::startSocket() {
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(serv_addr.sin_zero), 8);   
 	 
-	if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr)) < 0) 
-		printf("ERROR on binding");
-   
+	if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr)) < 0){
+		//printf("ERROR on binding\n");
+        return false;
+    }
+    return true;
 }
 
 Packet MainSocket::recvPacket() {
@@ -43,6 +45,10 @@ struct sockaddr_in MainSocket::getCli_addr() {
 
 int MainSocket::getSocket() {
     return sockfd;
+}
+
+void MainSocket::setPort(int newPort) {
+    serv_addr.sin_port = htons(newPort);
 }
 
 MainSocket::~MainSocket() {

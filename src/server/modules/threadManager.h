@@ -4,6 +4,7 @@
 #include "userThread.h"
 #include "notificationThread.h"
 #include "../../include/notification.h"
+#include "serverReplica.h"
 #include <thread>
 #include <vector>
 
@@ -17,6 +18,7 @@ public:
     static void createConsumerThread(std::string username);
     static struct sockaddr_in getCli_addr(std::string);
     static void setCli_addr(std::string, struct sockaddr_in);
+    static void startListen();
 };
 
 #endif

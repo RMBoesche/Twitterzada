@@ -1,3 +1,6 @@
+#ifndef mainSocket_def
+#define mainSocket_def
+
 #include <iostream>
 #include <sys/types.h>
 #include <unistd.h>
@@ -20,9 +23,12 @@ class MainSocket {
 	Packet m_packet;
 public:
     MainSocket(int port);
-    void startSocket();
+    bool startSocket();
     struct sockaddr_in getCli_addr();
     int getSocket();
     Packet recvPacket();
+    void setPort(int);
     ~MainSocket();
 };
+
+#endif
