@@ -67,4 +67,17 @@ void CommunicationManager::sendPacket(Packet& packet, int sockfd, struct sockadd
     }
 }
 
+void CommunicationManager::sendMulticast(Packet& packet, int sockfd) {
+    
+    struct sockaddr_in serv_addr;
+
+    serv_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(serv_addr.sin_zero), 8);
+
+    for (int port = 4001; port < 4006; port++) {
+	    serv_addr.sin_port = htons(port);
+        sendPacket(packet, sockfd, serv_addr);
+    }
+}
 

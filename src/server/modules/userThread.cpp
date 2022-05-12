@@ -18,6 +18,7 @@ void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in 
 
 	//PRONTO PRA SER CONSUMIDO - FUNCIONOU!!!!
 
+
 	while (true)
 	{
 		receive_packet = CommunicationManager::recvPacket(cli_sockfd, cli_addr);
@@ -28,12 +29,24 @@ void UserThread::start(std::string username, int cli_sockfd, struct sockaddr_in 
 			//...
 			std::cout << username << " sent: " << CommunicationManager::getContent(receive_packet._payload) << std::endl;
 			StorageManager::addNotification(username, CommunicationManager::getContent(receive_packet._payload));
+			
+			std::string aux = receive_packet._payload;
+			std::string payload = "replication " + username + " " + aux;
+			strcpy(receive_packet._payload, payload.c_str());
+
+			CommunicationManager::sendMulticast(receive_packet, cli_sockfd);
 		}
 		else if(query == FOLLOW) {
 			std::cout << username << " followed " << CommunicationManager::getContent(receive_packet._payload) << std::endl;
 			// add the follower to the user
 			StorageManager::addFollower(CommunicationManager::getContent(receive_packet._payload), username);
 			StorageManager::saveState();
+
+			std::string aux = receive_packet._payload;
+			std::string payload = "replication " + username + " " + aux;
+			strcpy(receive_packet._payload, payload.c_str());
+			
+			CommunicationManager::sendMulticast(receive_packet, cli_sockfd);
 		}
 		else if(query == END) {
 			SessionManager::logout(username);

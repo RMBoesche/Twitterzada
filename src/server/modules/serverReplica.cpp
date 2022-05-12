@@ -48,9 +48,27 @@ void serverReplica::start() {
     //faz primeira verificação se é o lider
     if(serverReplica::myreplicationport == REPLICA_PORT)
         serverReplica::isLeader = true;
-    else 
-        serverReplica::isLeader = false; 
-    
+    else {
+        serverReplica::isLeader = false;
+        
+        Packet send_packet = {
+		.type = 0,
+		.seqn = 0,
+		.length = 0,
+		.timestamp = 0,
+        };
+        strcpy(send_packet._payload, "replica"); //request replication 'backup total'
+        
+        struct sockaddr_in send_addr;
+        send_addr.sin_family = AF_INET;	
+        send_addr.sin_addr.s_addr = INADDR_ANY;
+        send_addr.sin_port = htons(4000);
+
+        CommunicationManager::sendPacket(send_packet, serverReplica::serverSocket.getSocket(), send_addr);
+    }
+        
+
+
     if(!serverReplica::isLeader) {
         ThreadManager::startListen();
     }
@@ -77,8 +95,7 @@ void serverReplica::start() {
     }
     serverReplica::serverSocket.~MainSocket();
     
-    printf("saiu loop\n");
-	
+    // printf("saiu loop\n");
 }
 
 // thread
@@ -97,9 +114,9 @@ void serverReplica::listen() {
     //                  --> quando receber a mensagem de novo, vai parar de enviar
 
     while(!serverReplica::isLeader) {
-        std::cout<<"recebido1"<<std::endl;
+        // std::cout<<"recebido1"<<std::endl;
         recv_packet = CommunicationManager::recvPacket(serverReplica::serverSocket.getSocket(), serverReplica::repNeighbour_addr);
-        std::cout<<"\nrecebido2"<<std::endl;
+        // std::cout<<"\nrecebido2"<<std::endl;
         
         listenLock.lock();
 
@@ -161,7 +178,7 @@ void serverReplica::listen() {
             }
         }
         else if(query == REPLICATION) {
-            //...
+            //...parse a ser realizado
         }
 
         listenLock.unlock();
@@ -191,24 +208,24 @@ void serverReplica::electionMessage(std::string message) {
     int Neighbor = getNeighbor();
 
     if (Neighbor == serverReplica::myreplicationport) {
-        std::cout << "entrou aqui" << std::endl;
+        // std::cout << "entrou aqui" << std::endl;
         serverReplica::isLeader = true;  
         return;
     }    
     send_addr.sin_port = htons(Neighbor);
     
-    std::cout << "mandando mensagem" << std::endl;
-    std::cout << "getSocket: " << serverReplica::serverSocket.getSocket() << std::endl;
-    std::cout << "send_port: " << ntohs(send_addr.sin_port) << std::endl; 
+    // std::cout << "mandando mensagem" << std::endl;
+    // std::cout << "getSocket: " << serverReplica::serverSocket.getSocket() << std::endl;
+    // std::cout << "send_port: " << ntohs(send_addr.sin_port) << std::endl; 
     CommunicationManager::sendPacket(send_packet, serverReplica::serverSocket.getSocket(), send_addr);
-    std::cout << "mensagem mandada" << std::endl;
+    // std::cout << "mensagem mandada" << std::endl;
     
 }
 
 int serverReplica::getNeighbor() {
 
     int port = serverReplica::myreplicationport;
-    printf("entrou no get com port: %d\n", port);
+    // printf("entrou no get com port: %d\n", port);
     
     //next port
     // port++;
@@ -225,7 +242,7 @@ int serverReplica::getNeighbor() {
             port = REPLICA_PORT+1;
         }
         if (port == serverReplica::myreplicationport) {
-            printf("AQUIIIII Neighbor: %d\n", port);
+            // printf("AQUIIIII Neighbor: %d\n", port);
             return port;
         }
 
@@ -243,10 +260,9 @@ int serverReplica::getNeighbor() {
 
         testSocket.~MainSocket();
         testSocket = MainSocket(port);
-        printf("testou port: %d\n", port);
+        // printf("testou port: %d\n", port);
         foundPort = testSocket.startSocket();
     }
     printf("Neighbor: %d\n", port);
     return port;
-    
 }

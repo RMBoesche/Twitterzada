@@ -1,0 +1,3 @@
+gabriel,[lucas,rodrigo]
+lucas,[gabriel,rodrigo]
+rodrigo,[gabriel]
